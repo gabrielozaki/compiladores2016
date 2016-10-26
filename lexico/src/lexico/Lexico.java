@@ -25,7 +25,7 @@ public class Lexico {
         String[] tabela_simbolos = {"+","-","*","/","(",")"};
         
         //String de teste, no futuro substituir por um input do user
-        String str = "2.2*2+(7/2)-2";
+        String str = "2.2*2+ (7/2)-2";
         
         //Tabela de tokens, aqui vamos armazenar os tokens classificados
         List<String> tokens = new ArrayList<String>();
@@ -58,6 +58,9 @@ public class Lexico {
                   tokens_nao_classifcados.add(tmp);
               //Limpa o tmp
               tmp = "";
+              //ignoramos os espacos em branco
+              if(ch == ' ')
+                  continue;
               //Adicionamos o simbolo, problema é que é necessário converter char para string porque o java nao faz automaticamente
               tokens_nao_classifcados.add(String.valueOf(ch));
           }
@@ -70,16 +73,24 @@ public class Lexico {
         for( String token: tokens_nao_classifcados ){
             //imprime os meninoes
             //System.out.println(token);
+            
+            //Executamos os regex para classificar os elementos
+            //Esse regex exige que tenha pelo menos um numero antes do . e um depois
+            //Logo .3 ou 2. nao sao validos
             if(token.matches("[0-9]+.[0-9]+")){
                 tokens.add("Numero_Real");
                 continue;
             }
             
+            //Um inteiro deve ter 1 ou mais digitos
+            //Nao ocorre problema com os reais devido ao uso do continue
             if(token.matches("[0-9]+")){
                 tokens.add("Numero_Inteiro");
                 continue;
             }
             
+            //Testa todos os operadores
+            //Proximo passo e alterar para usar a tabela de simbolos
             if(token.matches("[+]")){
                 tokens.add("Operador_Soma");
                 continue;
@@ -105,12 +116,13 @@ public class Lexico {
                 continue;
             }
             
-            if(token.matches("[}]")){
+            if(token.matches("[)]")){
                 tokens.add("Parenteses_Fecha");
                 continue;
             }
         }
         
+        //Imprime ambas as listas mostrando as classificacoes
         for(int i=0;i<tokens.size();i++ ){
             System.out.println(tokens_nao_classifcados.get(i)+"|"+tokens.get(i));
         }
