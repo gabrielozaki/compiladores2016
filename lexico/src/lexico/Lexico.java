@@ -22,11 +22,18 @@ public class Lexico {
         // TODO code application logic here
         
         //Tabela de simbolos, no caso da calculadora, qualquer coisa que nao seja digito ou numero
-        String[] tabela_simbolos = {"+","-","*","/","(",")"};
+        //Seguindo a aula: http://www2.fct.unesp.br/docentes/dmec/olivete/compiladores/arquivos/Aula1.pdf
+        //Alfabeto = {0,1,2,3,4,5,6,7,8,9,.,(,),+,-,*,/,\b} 
+        //Definicao dos tipos de tokens
+        String[] tipos_tokens = {"Numero Real","Numero Inteiro","Operador_Soma","Operador_Subtracao","Operador_Multiplicacao","Operador_Divisao","Parenteses_Abre","Parenteses_Fecha"};
+        //Definicao para identificar cada tipo de token, a relacao e de 1:1 
+        //Para Reais, esse regex exige que tenha pelo menos um numero antes do . e pelo menos um numero depois, logo .3 ou 2. nao sao validos
+        //Para Inteiros, esse regex exige que tenha pelo menos um numero    
+        String[] tipos_tokens_regex = {"[0-9]+.[0-9]+","[0-9]+","[+]","[-]","[*]","[/]","[(]","[)]"};
         
         //String de teste, no futuro substituir por um input do user
         String str = "2.2*2+ (7/2)-2";
-        
+        //String str = "3.2 + (2 * 12.01)";
         //Tabela de tokens, aqui vamos armazenar os tokens classificados
         List<String> tokens = new ArrayList<String>();
         
@@ -74,72 +81,23 @@ public class Lexico {
             //imprime os meninoes
             //System.out.println(token);
             
-            //Executamos os regex para classificar os elementos
-            //Esse regex exige que tenha pelo menos um numero antes do . e um depois
-            //Logo .3 ou 2. nao sao validos
-            if(token.matches("[0-9]+.[0-9]+")){
-                tokens.add("Numero_Real");
-                continue;
-            }
-            
-            //Um inteiro deve ter 1 ou mais digitos
-            //Nao ocorre problema com os reais devido ao uso do continue
-            if(token.matches("[0-9]+")){
-                tokens.add("Numero_Inteiro");
-                continue;
-            }
-            
-            //Testa todos os operadores
-            //Proximo passo e alterar para usar a tabela de simbolos
-            if(token.matches("[+]")){
-                tokens.add("Operador_Soma");
-                continue;
-            }
-            
-            if(token.matches("[-]")){
-                tokens.add("Operador_Subtracao");
-                continue;
-            }
-            
-            if(token.matches("[*]")){
-                tokens.add("Operador_Multiplicacao");
-                continue;
-            }
-            
-            if(token.matches("[/]")){
-                tokens.add("Operador_Divisao");
-                continue;
-            }
-            
-            if(token.matches("[(]")){
-                tokens.add("Parenteses_Abre");
-                continue;
-            }
-            
-            if(token.matches("[)]")){
-                tokens.add("Parenteses_Fecha");
-                continue;
-            }
+            //Efetua o preenchmento da lista tokens
+            for(int i=0;i<tipos_tokens.length;i++)
+                //Se o token possuir a expressao regular, adiciona a lista de tokens
+                if(token.matches(tipos_tokens_regex[i]))
+                {
+                    //adiciona a classificacao a lista de tokens
+                    tokens.add(tipos_tokens[i]);
+                    //Evita que um numero real seja classificado como inteiro e tambem evita processamento desnecessario
+                    //pois um token so e classificado uma vez
+                    break;
+                }
         }
         
         //Imprime ambas as listas mostrando as classificacoes
         for(int i=0;i<tokens.size();i++ ){
             System.out.println(tokens_nao_classifcados.get(i)+"|"+tokens.get(i));
         }
-/*
-        
-        
-        // The Regular expression (Finds {word} tokens)
-        Pattern pt = Pattern.compile("(-?)\\d+|\\+|\\*|/|-|\\(|\\)");
-
-        // Match the string with the pattern
-        Matcher m = pt.matcher(str);
-
-        // If results are found
-        while (m.find()) {
-            System.out.println(m);
-            System.out.println(m.group()); // {World}
-        }*/
     }
     
 }
