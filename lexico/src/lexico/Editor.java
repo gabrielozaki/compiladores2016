@@ -1,8 +1,23 @@
 package lexico;
 
+import java.awt.Color;
+import java.awt.Component;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.JFileChooser;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.text.MutableAttributeSet;
+import javax.swing.text.SimpleAttributeSet;
+import javax.swing.text.StyleConstants;
 
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -32,18 +47,20 @@ public class Editor extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        jMenu4 = new javax.swing.JMenu();
         jScrollPane1 = new javax.swing.JScrollPane();
         Equacoes = new javax.swing.JTextArea();
         jLabel1 = new javax.swing.JLabel();
+        ResultadosTab = new javax.swing.JTabbedPane();
         jScrollPane2 = new javax.swing.JScrollPane();
         TabelaAnalise = new javax.swing.JTable();
-        jButton1 = new javax.swing.JButton();
-        jMenuBar1 = new javax.swing.JMenuBar();
-        jMenu1 = new javax.swing.JMenu();
-        jMenu3 = new javax.swing.JMenu();
-
-        jMenu4.setText("jMenu4");
+        jScrollPane4 = new javax.swing.JScrollPane();
+        ErroPane = new javax.swing.JTextPane();
+        jLabel2 = new javax.swing.JLabel();
+        BarraMenu = new javax.swing.JMenuBar();
+        ArquivoMenu = new javax.swing.JMenu();
+        AbrirArquivoMenu = new javax.swing.JMenuItem();
+        AnalisadoresMenu = new javax.swing.JMenu();
+        LexicoMenu = new javax.swing.JMenuItem();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -52,7 +69,7 @@ public class Editor extends javax.swing.JFrame {
         Equacoes.setText("2.2*2+(7/2)-2");
         jScrollPane1.setViewportView(Equacoes);
 
-        jLabel1.setText("Digite uma expressão por linha ou abra um arquivo utilizando o menu acima");
+        jLabel1.setText("Expressões");
 
         TabelaAnalise.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -64,65 +81,83 @@ public class Editor extends javax.swing.JFrame {
         ));
         jScrollPane2.setViewportView(TabelaAnalise);
 
-        jButton1.setText("Analise Lexica");
-        jButton1.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseClicked(java.awt.event.MouseEvent evt) {
-                jButton1MouseClicked(evt);
+        ResultadosTab.addTab("Tabela lexica", jScrollPane2);
+
+        ErroPane.setEditable(false);
+        jScrollPane4.setViewportView(ErroPane);
+
+        ResultadosTab.addTab("Erro", jScrollPane4);
+
+        jLabel2.setText("Saída");
+
+        ArquivoMenu.setText("Arquivo");
+
+        AbrirArquivoMenu.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_O, java.awt.event.InputEvent.CTRL_MASK));
+        AbrirArquivoMenu.setText("Abrir Arquivo");
+        AbrirArquivoMenu.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                AbrirArquivoMenuActionPerformed(evt);
             }
         });
+        ArquivoMenu.add(AbrirArquivoMenu);
 
-        jMenu1.setText("Arquivo");
+        BarraMenu.add(ArquivoMenu);
 
-        jMenu3.setText("Abrir Arquivo");
-        jMenu1.add(jMenu3);
+        AnalisadoresMenu.setText("Analisadores");
 
-        jMenuBar1.add(jMenu1);
+        LexicoMenu.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_F5, 0));
+        LexicoMenu.setText("Analise Lexica");
+        LexicoMenu.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                LexicoMenuActionPerformed(evt);
+            }
+        });
+        AnalisadoresMenu.add(LexicoMenu);
 
-        setJMenuBar(jMenuBar1);
+        BarraMenu.add(AnalisadoresMenu);
+
+        setJMenuBar(BarraMenu);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(jScrollPane2)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
-                        .addComponent(jLabel1)
-                        .addGap(0, 41, Short.MAX_VALUE)))
-                .addContainerGap())
             .addGroup(layout.createSequentialGroup()
-                .addGap(223, 223, 223)
-                .addComponent(jButton1)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(ResultadosTab, javax.swing.GroupLayout.DEFAULT_SIZE, 522, Short.MAX_VALUE)
+                    .addComponent(jScrollPane1)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabel2)
+                            .addComponent(jLabel1))
+                        .addGap(0, 0, Short.MAX_VALUE)))
+                .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGap(9, 9, 9)
+                .addGap(11, 11, 11)
                 .addComponent(jLabel1)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 165, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 151, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jButton1)
-                .addGap(18, 18, 18)
-                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 201, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addComponent(jLabel2)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(ResultadosTab, javax.swing.GroupLayout.PREFERRED_SIZE, 190, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(14, Short.MAX_VALUE))
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    //Quando clica no botão da analise lexica
-    private void jButton1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jButton1MouseClicked
-        // TODO add your handling code here:
-        //Pega o texto do TextArea
+    private void LexicoMenuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_LexicoMenuActionPerformed
+        //Obtem as equacoes
+        //Trocar a textArea no futuro por um JPaneText?
         String str = Equacoes.getText();
 
-        
-        List<Token> tokens = new ArrayList<Token>();
+        //Cria uma lista de tokens, eles são inicializados com os lexiomas mais informações referentes(ver construtor)
+        List<Token> tokens = new ArrayList<>();
         
         //Aqui vamos dividir os elementos em tokens nao classificados
         //String temporaria para auxiliar no laço, ela vai basicamente servir para armazenar numeros, maiores informações no laço
@@ -151,10 +186,17 @@ public class Editor extends javax.swing.JFrame {
               tmp = "";
               ini = i;
               //ignoramos os espacos em branco
-              if(ch == ' ' || ch == '\n'){
+              if(ch == ' '){
                   i++;
                   continue;
               }
+              //Pegamos a quebra de linha, sendo que esta define o final de uma equacao
+              if(ch == '\n'){
+                  linha++;
+                  i=1;
+                  continue;
+              }
+              
               //Adicionamos o simbolo, problema é que é necessário converter char para string porque o java nao faz automaticamente
               tokens.add(new Token(String.valueOf(ch),linha,ini,i));
           }
@@ -164,6 +206,7 @@ public class Editor extends javax.swing.JFrame {
         if(tmp != "")
             tokens.add(new Token(tmp,linha,ini,i-1));
         
+        //Construimos novamente a tabela de simbolos, para poder preenche-la no for abaixo
         DefaultTableModel modelo = new javax.swing.table.DefaultTableModel();
         modelo.addColumn("Lexema");
         modelo.addColumn("Token");
@@ -172,16 +215,63 @@ public class Editor extends javax.swing.JFrame {
         modelo.addColumn("Coluna Final");
         modelo.addColumn("Erro");
                
-        //Imprime resultados
+        //Insere os resultados na tabela
+        String erro = "";
         for(Token token:tokens){
             token.classificaToken();
             if(token.erro == null)
-                 modelo.addRow(new String[]{token.lexema,token.tipo.name(),token.linha + "",token.coluna_ini + "",token.coluna_fim+"","------"});
-            else
+                modelo.addRow(new String[]{token.lexema,token.tipo.name(),token.linha + "",token.coluna_ini + "",token.coluna_fim+"","------"});
+            else{
                 modelo.addRow(new String[]{token.lexema,"---------",token.linha + "",token.coluna_ini + "",token.coluna_fim+"",token.erro.name()});
+                //String de erro que irá preencher a area de erro
+                //O resultado é algo como:
+                //"ERRO: 4:2 "x" => Não pertence ao alfabeto
+                erro += "ERRO: "+token.linha+":"+token.coluna_ini+" \""+token.lexema+"\" => "+token.erro.name()+"\n";
+            }
         }
+        //Joga tudo pra tabela
         TabelaAnalise.setModel(modelo);
-    }//GEN-LAST:event_jButton1MouseClicked
+        
+        //Se ocorreu um erro
+        if(erro != "")
+        {
+            //Deixa o texto vermelho e insere o texto de erro no jpane
+            MutableAttributeSet attributes = new SimpleAttributeSet();
+            StyleConstants.setForeground(attributes, Color.red);
+            ErroPane.setCharacterAttributes(attributes, false);
+            ErroPane.setText(erro);
+            ResultadosTab.setSelectedIndex(1);
+        }else{
+            //Se nao houve erros, limpa jpane e coloca a aba na tabela
+            ErroPane.setText("");
+            ResultadosTab.setSelectedIndex(0);
+        }
+    }//GEN-LAST:event_LexicoMenuActionPerformed
+
+    private void AbrirArquivoMenuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_AbrirArquivoMenuActionPerformed
+        //Foi escolhido o CTRL+O como atalho porque o CTRL+A selecionava todo texto da TextArea
+        // Explorador de arquivos do Java, exemplo veio do site da oracle
+        JFileChooser fc = new JFileChooser();
+        //Faz ele abrir inicialmente na pasta do projeto
+        fc.setCurrentDirectory(new java.io.File("."));
+        //Abre o explorador
+        int returnVal = fc.showOpenDialog(Editor.this);
+        //Se foi clicado no abrir arquivo
+        if (returnVal == JFileChooser.APPROVE_OPTION) {
+            //Pega o arquivo selecionado
+            File file = fc.getSelectedFile();
+            try {
+                //Joga o conteudo dele numa string
+                //O delimitador Z evita dolocar uma nova linha no final do arquivo
+                //Referencia: http://stackoverflow.com/questions/2707870/whats-the-difference-between-z-and-z-in-a-regular-expression-and-when-and-how
+                String conteudo = new Scanner(file).useDelimiter("\\Z").next();
+                //Joga o conteudo na textArea das equacoes
+                Equacoes.setText(conteudo);
+            } catch (FileNotFoundException ex) {
+                Logger.getLogger(Editor.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+    }//GEN-LAST:event_AbrirArquivoMenuActionPerformed
 
     /**
      * @param args the command line arguments
@@ -214,20 +304,25 @@ public class Editor extends javax.swing.JFrame {
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
                 new Editor().setVisible(true);
+                
             }
         });
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JMenuItem AbrirArquivoMenu;
+    private javax.swing.JMenu AnalisadoresMenu;
+    private javax.swing.JMenu ArquivoMenu;
+    private javax.swing.JMenuBar BarraMenu;
     private javax.swing.JTextArea Equacoes;
+    private javax.swing.JTextPane ErroPane;
+    private javax.swing.JMenuItem LexicoMenu;
+    private javax.swing.JTabbedPane ResultadosTab;
     private javax.swing.JTable TabelaAnalise;
-    private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel1;
-    private javax.swing.JMenu jMenu1;
-    private javax.swing.JMenu jMenu3;
-    private javax.swing.JMenu jMenu4;
-    private javax.swing.JMenuBar jMenuBar1;
+    private javax.swing.JLabel jLabel2;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JScrollPane jScrollPane4;
     // End of variables declaration//GEN-END:variables
 }
