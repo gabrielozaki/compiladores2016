@@ -186,19 +186,21 @@ public class Editor extends javax.swing.JFrame {
               tmp = "";
               ini = i;
               //ignoramos os espacos em branco
-              if(ch == ' '){
-                  continue;
-              }
-              //Pegamos a quebra de linha, sendo que esta define o final de uma equacao
-              else if(ch == '\n'){
+              if(ch != ' '){
+                 //Pegamos a quebra de linha, sendo que esta define o final de uma equacao
+                if(ch == '\n'){
                   linha++;
+                  //Volta ini para 1 pois e uma nova linha
                   ini=1;
-                  i=1;
-              }
-              else{
-                //Adicionamos o simbolo, problema é que é necessário converter char para string porque o java nao faz automaticamente
-                tokens.add(new Token(String.valueOf(ch),linha,ini,i));
-                ini = i+1;
+                  //o incremento ocorre no final do laco, entao setamos para 0 para ele ser incrementado para 1
+                  i=0;
+                }
+                else{
+                    //Adicionamos o simbolo, problema é que é necessário converter char para string porque o java nao faz automaticamente
+                    tokens.add(new Token(String.valueOf(ch),linha,ini,i));
+                    //Ini recebe i+1 pois estamos preparando o ini do proximo numero
+                    ini = i+1;
+                }
               }
           }
           i++;
