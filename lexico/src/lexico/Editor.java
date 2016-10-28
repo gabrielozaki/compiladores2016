@@ -187,18 +187,19 @@ public class Editor extends javax.swing.JFrame {
               ini = i;
               //ignoramos os espacos em branco
               if(ch == ' '){
-                  i++;
                   continue;
               }
               //Pegamos a quebra de linha, sendo que esta define o final de uma equacao
-              if(ch == '\n'){
+              else if(ch == '\n'){
                   linha++;
+                  ini=1;
                   i=1;
-                  continue;
               }
-              
-              //Adicionamos o simbolo, problema é que é necessário converter char para string porque o java nao faz automaticamente
-              tokens.add(new Token(String.valueOf(ch),linha,ini,i));
+              else{
+                //Adicionamos o simbolo, problema é que é necessário converter char para string porque o java nao faz automaticamente
+                tokens.add(new Token(String.valueOf(ch),linha,ini,i));
+                ini = i+1;
+              }
           }
           i++;
         }
