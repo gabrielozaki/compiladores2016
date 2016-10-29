@@ -1,19 +1,13 @@
 package compilador;
 
 import java.awt.Color;
-import java.awt.Component;
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JFileChooser;
-import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.text.MutableAttributeSet;
 import javax.swing.text.SimpleAttributeSet;
@@ -47,8 +41,6 @@ public class Editor extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        jScrollPane1 = new javax.swing.JScrollPane();
-        Equacoes = new javax.swing.JTextArea();
         jLabel1 = new javax.swing.JLabel();
         ResultadosTab = new javax.swing.JTabbedPane();
         jScrollPane2 = new javax.swing.JScrollPane();
@@ -56,6 +48,8 @@ public class Editor extends javax.swing.JFrame {
         jScrollPane4 = new javax.swing.JScrollPane();
         ErroPane = new javax.swing.JTextPane();
         jLabel2 = new javax.swing.JLabel();
+        jScrollPane3 = new javax.swing.JScrollPane();
+        EditorTexto = new javax.swing.JTextPane();
         BarraMenu = new javax.swing.JMenuBar();
         ArquivoMenu = new javax.swing.JMenu();
         AbrirArquivoMenu = new javax.swing.JMenuItem();
@@ -64,12 +58,7 @@ public class Editor extends javax.swing.JFrame {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
-        Equacoes.setColumns(20);
-        Equacoes.setRows(5);
-        Equacoes.setText("2.2*2+(7/2)-2");
-        jScrollPane1.setViewportView(Equacoes);
-
-        jLabel1.setText("Expressões");
+        jLabel1.setText("Editor");
 
         TabelaAnalise.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -89,6 +78,13 @@ public class Editor extends javax.swing.JFrame {
         ResultadosTab.addTab("Erro", jScrollPane4);
 
         jLabel2.setText("Saída");
+
+        EditorTexto.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                EditorTextoKeyPressed(evt);
+            }
+        });
+        jScrollPane3.setViewportView(EditorTexto);
 
         ArquivoMenu.setText("Arquivo");
 
@@ -122,17 +118,20 @@ public class Editor extends javax.swing.JFrame {
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(ResultadosTab, javax.swing.GroupLayout.DEFAULT_SIZE, 522, Short.MAX_VALUE)
-                    .addComponent(jScrollPane1)
                     .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabel2)
-                            .addComponent(jLabel1))
-                        .addGap(0, 0, Short.MAX_VALUE)))
-                .addContainerGap())
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(jScrollPane3)
+                            .addComponent(ResultadosTab, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 592, Short.MAX_VALUE)
+                            .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
+                                .addComponent(jLabel1)
+                                .addGap(0, 0, Short.MAX_VALUE)))
+                        .addContainerGap())
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jLabel2)
+                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -140,12 +139,12 @@ public class Editor extends javax.swing.JFrame {
                 .addGap(11, 11, 11)
                 .addComponent(jLabel1)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 165, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 171, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel2)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(ResultadosTab, javax.swing.GroupLayout.PREFERRED_SIZE, 190, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(14, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         pack();
@@ -154,7 +153,7 @@ public class Editor extends javax.swing.JFrame {
     private void LexicoMenuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_LexicoMenuActionPerformed
         //Obtem as equacoes
         //Trocar a textArea no futuro por um JPaneText?
-        String str = Equacoes.getText();
+        String str = EditorTexto.getText();
 
         //Cria uma instancia do analisador lexico
         AnalisadorLexico al = new AnalisadorLexico();
@@ -202,6 +201,8 @@ public class Editor extends javax.swing.JFrame {
             ErroPane.setText("");
             ResultadosTab.setSelectedIndex(0);
         }
+        
+        
     }//GEN-LAST:event_LexicoMenuActionPerformed
 
     private void AbrirArquivoMenuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_AbrirArquivoMenuActionPerformed
@@ -222,13 +223,18 @@ public class Editor extends javax.swing.JFrame {
                 //Referencia: http://stackoverflow.com/questions/2707870/whats-the-difference-between-z-and-z-in-a-regular-expression-and-when-and-how
                 String conteudo = new Scanner(file).useDelimiter("\\Z").next();
                 //Joga o conteudo na textArea das equacoes
-                Equacoes.setText(conteudo);
+                EditorTexto.setText(conteudo);
             } catch (FileNotFoundException ex) {
                 Logger.getLogger(Editor.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
     }//GEN-LAST:event_AbrirArquivoMenuActionPerformed
 
+    private void EditorTextoKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_EditorTextoKeyPressed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_EditorTextoKeyPressed
+
+    
     /**
      * @param args the command line arguments
      */
@@ -271,15 +277,15 @@ public class Editor extends javax.swing.JFrame {
     private javax.swing.JMenu AnalisadoresMenu;
     private javax.swing.JMenu ArquivoMenu;
     private javax.swing.JMenuBar BarraMenu;
-    private javax.swing.JTextArea Equacoes;
+    private javax.swing.JTextPane EditorTexto;
     private javax.swing.JTextPane ErroPane;
     private javax.swing.JMenuItem LexicoMenu;
     private javax.swing.JTabbedPane ResultadosTab;
     private javax.swing.JTable TabelaAnalise;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
-    private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JScrollPane jScrollPane4;
     // End of variables declaration//GEN-END:variables
 }
