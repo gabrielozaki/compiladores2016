@@ -7,11 +7,16 @@ import java.util.List;
 import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.swing.JFileChooser;
+import javax.swing.WindowConstants;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.text.DefaultStyledDocument;
 import javax.swing.text.MutableAttributeSet;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
+import javax.swing.text.StyledDocument;
 
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -30,8 +35,11 @@ public class Editor extends javax.swing.JFrame {
      */
     public Editor() {
         initComponents();
+        this.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
     }
-
+    //Cria tabela de estilos para o editor
+    private StyledDocument syntaxHigh = (StyledDocument) new DefaultStyledDocument();
+    
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -49,7 +57,7 @@ public class Editor extends javax.swing.JFrame {
         ErroPane = new javax.swing.JTextPane();
         jLabel2 = new javax.swing.JLabel();
         jScrollPane3 = new javax.swing.JScrollPane();
-        EditorTexto = new javax.swing.JTextPane();
+        EditorTexto = new javax.swing.JTextPane(syntaxHigh);
         BarraMenu = new javax.swing.JMenuBar();
         ArquivoMenu = new javax.swing.JMenu();
         AbrirArquivoMenu = new javax.swing.JMenuItem();
@@ -82,6 +90,9 @@ public class Editor extends javax.swing.JFrame {
         EditorTexto.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyPressed(java.awt.event.KeyEvent evt) {
                 EditorTextoKeyPressed(evt);
+            }
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                EditorTextoKeyReleased(evt);
             }
         });
         jScrollPane3.setViewportView(EditorTexto);
@@ -169,6 +180,12 @@ public class Editor extends javax.swing.JFrame {
                
         //Insere os resultados na tabela
         String erro = "";
+        //Define o estilo vermelho
+        //Define o estilo vermelho
+        MutableAttributeSet attributes = new SimpleAttributeSet();
+        StyleConstants.setForeground(attributes, Color.red);
+        StyleConstants.setBold(attributes, true);
+        
         for(Token token:tokens){
             token.classificaToken();
             if(token.erro == null)
@@ -179,6 +196,13 @@ public class Editor extends javax.swing.JFrame {
                 //O resultado é algo como:
                 //"ERRO: 4:2 "x" => Não pertence ao alfabeto
                 erro += "ERRO: "+token.linha+":"+token.coluna_ini+" \""+token.lexema+"\" => "+token.erro.name()+"\n";
+                //Pesquisa pelo erro
+                Pattern p = Pattern.compile(token.lexema);  
+                Matcher m = p.matcher(str);
+                //Para cada ocorrencia do erro, ele vai deixar vermelho e em negrito
+                while (m.find()) {
+                    syntaxHigh.setCharacterAttributes(m.start(), token.lexema.length(), attributes, true);
+                }
             }
         }
         //Joga tudo pra tabela
@@ -188,8 +212,6 @@ public class Editor extends javax.swing.JFrame {
         if(erro != "")
         {
             //Deixa o texto vermelho e insere o texto de erro no jpane
-            MutableAttributeSet attributes = new SimpleAttributeSet();
-            StyleConstants.setForeground(attributes, Color.red);
             ErroPane.setCharacterAttributes(attributes, false);
             ErroPane.setText(erro);
             ResultadosTab.setSelectedIndex(1);
@@ -228,8 +250,38 @@ public class Editor extends javax.swing.JFrame {
     }//GEN-LAST:event_AbrirArquivoMenuActionPerformed
 
     private void EditorTextoKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_EditorTextoKeyPressed
-        // TODO add your handling code here:
+
     }//GEN-LAST:event_EditorTextoKeyPressed
+
+    private void EditorTextoKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_EditorTextoKeyReleased
+        //Pega todo texto
+        String str = EditorTexto.getText();
+        
+       //Lista de tudo que queremos colorir
+       String[] comandos = {"\\bprogram\\b","\\bvar\\b","\\bprocedure\\b","\\binteger\\b","\\bint\\b","\\breal\\b","\\bboolean\\b",
+           "\\btrue\\b","\\bfalse\\b","\\bread\\b","\\bwrite\\b","\\bbegin\\b","\\bend\\b","\\bif\\b","\\bthen\\b","\\belse\\b","\\bwhile\\b","\\bdo\\b",
+       "\\band\\b","\\bor\\b","\\bdiv\\b","\\bnot\\b"};
+        
+        MutableAttributeSet attributes = new SimpleAttributeSet();
+        //Pinta de preto e sem realce
+        StyleConstants.setForeground(attributes, Color.black);
+        StyleConstants.setBold(attributes, false);
+        syntaxHigh.setCharacterAttributes(0, str.length(), attributes, true);
+        //Pinta de azul e deixa negrito
+        StyleConstants.setForeground(attributes, Color.blue);
+        StyleConstants.setBold(attributes, true);
+        for(String c:comandos)
+        {
+            System.out.println(c+" "+c.length());
+            Pattern p = Pattern.compile(c);  
+            Matcher m = p.matcher(str);
+            //Para cada ocorrencia do erro, ele vai deixar vermelho e em negrito
+            while (m.find()) {
+                syntaxHigh.setCharacterAttributes(m.start(), c.length()-4, attributes, true);
+            }
+        }
+        
+    }//GEN-LAST:event_EditorTextoKeyReleased
 
     
     /**

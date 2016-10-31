@@ -214,7 +214,11 @@
         <Component class="javax.swing.JTextPane" name="EditorTexto">
           <Events>
             <EventHandler event="keyPressed" listener="java.awt.event.KeyListener" parameters="java.awt.event.KeyEvent" handler="EditorTextoKeyPressed"/>
+            <EventHandler event="keyReleased" listener="java.awt.event.KeyListener" parameters="java.awt.event.KeyEvent" handler="EditorTextoKeyReleased"/>
           </Events>
+          <AuxValues>
+            <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="new javax.swing.JTextPane(syntaxHigh)"/>
+          </AuxValues>
         </Component>
       </SubComponents>
     </Container>
