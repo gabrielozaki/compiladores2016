@@ -30,6 +30,8 @@ public class Token {
         Inteiro("integer|int"),
         Real("real"),
         Booleano("boolean"),
+        //Atribuicao
+        Atribuicao(":="),
         //Valores que um booleano pode assumir, uso isolado tambem e comum
         Valor_Boleano("true|false"),
         //Declaracao de comandos de leitura escrita OBS da pag 1

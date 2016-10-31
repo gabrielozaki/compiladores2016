@@ -29,6 +29,7 @@ public class AnalisadorLexico {
         int i = 1;
         int ini = 1;
         int linha = 1;
+        char ultimo = ' ';
         //Boleano para verificar se o lexima contem apenas numeros
         boolean numero;
 
@@ -59,10 +60,20 @@ public class AnalisadorLexico {
                             ini = 1;
                             //o incremento ocorre no final do laco, entao setamos para 0 para ele ser incrementado para 1
                             i = 0;
+                        } else if(ch == '=' && ultimo == ':'){
+                            //:= é caso especial, seria o token de atribuicao
+                            //Por isso removemos o token : cadastrado previamente
+                            tokens.remove(tokens.size() -1);
+                            //E cadastramos o novo
+                            //ini -1 é para pegar o inicio do anterior
+                            tokens.add(new Token(":=",linha,ini-1,i));
+                            //Ini recebe i+1 pois estamos preparando o ini do proximo elemento
+                            ini = i + 1;
                         } else {
+                            
                             //Adicionamos o simbolo, problema é que é necessário converter char para string porque o java nao faz automaticamente
                             tokens.add(new Token(String.valueOf(ch), linha, ini, i));
-                            //Ini recebe i+1 pois estamos preparando o ini do proximo numero
+                            //Ini recebe i+1 pois estamos preparando o ini do proximo elemento
                             ini = i + 1;
                         }
                     }
@@ -74,48 +85,11 @@ public class AnalisadorLexico {
                 tokens.add(new Token(tmp, linha, ini, i - 1));
                 tmp = "";
             }
-            //Prepara o i para proxima interacao
+            //Prepara o i para proxima interacao            
             i++;
-            /* 
-          //Comparaçao simples de um caractere nao justifica uso de regex
-          if( (ch >= '0' && ch <= '9') || ch == '.' )
-          {
-              //Aqui isolaremos os numeros, o ponto é adicionado por causa dos reais
-              tmp += ch;
-              
-          }else{
-              //Verificamos se existe um conteudo em tmp, se existir adiciona aos tokens nao classificados
-              //Sinal que a interaçao anterior pegou um numero
-              if(tmp != "")
-                  tokens.add(new Token(tmp,linha,ini,i-1));
-     
-              //Limpa o tmp
-              tmp = "";
-              ini = i;
-              //ignoramos os espacos em branco
-              if(ch != ' '){
-                 //Pegamos a quebra de linha, sendo que esta define o final de uma equacao
-                if(ch == '\n'){
-                  linha++;
-                  //Volta ini para 1 pois e uma nova linha
-                  ini=1;
-                  //o incremento ocorre no final do laco, entao setamos para 0 para ele ser incrementado para 1
-                  i=0;
-                }
-                else{
-                    //Adicionamos o simbolo, problema é que é necessário converter char para string porque o java nao faz automaticamente
-                    tokens.add(new Token(String.valueOf(ch),linha,ini,i));
-                    //Ini recebe i+1 pois estamos preparando o ini do proximo numero
-                    ini = i+1;
-                }
-              }
-          }
-          i++;
-        }
-        //Repetimos esse trecho pois o ultimo valor pode ser um numero nao inserido na tabela
-        if(tmp != "")
-            tokens.add(new Token(tmp,linha,ini,i-1));
-             */
+            
+            ultimo = ch;
+
         }
         return tokens;
     }

@@ -272,7 +272,7 @@ public class Editor extends javax.swing.JFrame {
         StyleConstants.setBold(attributes, true);
         for(String c:comandos)
         {
-            System.out.println(c+" "+c.length());
+            //Localiza o padrao para realcar
             Pattern p = Pattern.compile(c);  
             Matcher m = p.matcher(str);
             //Para cada ocorrencia do erro, ele vai deixar vermelho e em negrito
