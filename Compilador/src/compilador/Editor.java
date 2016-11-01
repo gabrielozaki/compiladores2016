@@ -163,11 +163,12 @@ public class Editor extends javax.swing.JFrame {
         //Trocar a textArea no futuro por um JPaneText?
         String str = EditorTexto.getText();
 
-        //Cria uma instancia do analisador lexico
-        AnalisadorLexico al = new AnalisadorLexico();
+        //Cria uma instancia do analisador sintatico, que ira passar os dados para o lexico
+        AnalisadorSintatico as = new AnalisadorSintatico();
         
         //Recebe uma lista de tokens 
-        List<Token> tokens = al.analisa(str);
+        as.populaLexico(str);
+        List<Token> tokens = as.apenasLexico();
         
         //Construimos novamente a tabela de simbolos, para poder preenche-la no for abaixo
         DefaultTableModel modelo = new javax.swing.table.DefaultTableModel();
