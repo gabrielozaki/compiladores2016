@@ -68,6 +68,7 @@ public class Token {
         //Comentarios
         Chaves_Abre("\\{"),
         Chaves_Fecha("\\}"),
+        Comentario_Linha("//"),
         //Para Reais, esse regex exige que tenha pelo menos um numero antes do . e pelo menos um numero depois, logo .3 ou 2. nao sao validos
         Numero_Real("[0-9]+.[0-9]+"),
         //Para Inteiros, esse regex exige que tenha pelo menos um numero 
@@ -85,7 +86,7 @@ public class Token {
         Identificador("(_|[a-z]|[A-Z])+(_|[a-z]|[A-Z]|[0-9])*");
         
         
-        private final String regex;
+        public final String regex;
         
         //E considerada uma boa pratica de programacao proteger o construtor do enum
         //Garantindo assim tipos estaticos
@@ -96,7 +97,11 @@ public class Token {
     
     //Os erros tambem sao enum
     public static enum Erro{
-        Nao_Pertence_Alfabeto;
+        Nao_Pertence_Alfabeto,
+        Comentario_Nao_Fechado,
+        Identificador_Overflow,
+        Numero_Overflow;
+        
     }
     
     public String lexema  = "";
@@ -112,37 +117,5 @@ public class Token {
         this.linha      = linha;
         this.coluna_ini = ini;
         this.coluna_fim = fim;
-    }
-    
-    //Classicamos o token, por exemplo:
-    //3.2 | Numero_Real
-    // + | Operador_Soma
-    //( |  Parenteses_Abre
-    public void classificaToken(){
-        //Verificador de erro, caso ele chegue true ao final significa que nenhum regex o classificou
-        boolean erro = true;
-        //Percorre todos os tipos de tokens
-        for(Tipo t: Tipo.values())
-        {
-            //Se coincidir com algum, o classifica como sendo daquele tipo
-            if(this.lexema.matches(t.regex)){
-                this.tipo = t;
-                //Evita o erro
-                erro      = false;
-                //Como ja encontrou o tipo, nao e necessario processar os outros tipos
-                break;
-            }
-        }
-        //Se chegou aqui, e porque o lexima nao pertence ao alfabeto
-        if(erro)
-            this.erro = Erro.Nao_Pertence_Alfabeto;
-            
-    }
-    
-    public void listaTipo(){
-        for(Tipo t: Tipo.values())
-        {
-            System.out.println(t.name());
-        }
     }
 }

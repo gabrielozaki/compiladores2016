@@ -2,7 +2,7 @@ program correto;
 int a, b, c;
 boolean d, e, f;
 
-{Comentário correto
+{Comentario correto
 
 procedure proc(var a1 : int);
 int a, b, c;

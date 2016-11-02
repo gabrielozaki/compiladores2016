@@ -23,7 +23,6 @@ import javax.swing.text.StyledDocument;
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-
 /**
  *
  * @author gabrielozaki
@@ -39,7 +38,7 @@ public class Editor extends javax.swing.JFrame {
     }
     //Cria tabela de estilos para o editor
     private StyledDocument syntaxHigh = (StyledDocument) new DefaultStyledDocument();
-    
+
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -165,11 +164,11 @@ public class Editor extends javax.swing.JFrame {
 
         //Cria uma instancia do analisador sintatico, que ira passar os dados para o lexico
         AnalisadorSintatico as = new AnalisadorSintatico();
-        
+
         //Recebe uma lista de tokens 
         as.populaLexico(str);
         List<Token> tokens = as.apenasLexico();
-        
+
         //Construimos novamente a tabela de simbolos, para poder preenche-la no for abaixo
         DefaultTableModel modelo = new javax.swing.table.DefaultTableModel();
         modelo.addColumn("Lexema");
@@ -178,7 +177,7 @@ public class Editor extends javax.swing.JFrame {
         modelo.addColumn("Coluna Inicial");
         modelo.addColumn("Coluna Final");
         modelo.addColumn("Erro");
-               
+
         //Insere os resultados na tabela
         String erro = "";
         //Define o estilo vermelho
@@ -186,19 +185,25 @@ public class Editor extends javax.swing.JFrame {
         MutableAttributeSet attributes = new SimpleAttributeSet();
         StyleConstants.setForeground(attributes, Color.red);
         StyleConstants.setBold(attributes, true);
-        
-        for(Token token:tokens){
-            token.classificaToken();
-            if(token.erro == null)
-                modelo.addRow(new String[]{token.lexema,token.tipo.name(),token.linha + "",token.coluna_ini + "",token.coluna_fim+"","------"});
-            else{
-                modelo.addRow(new String[]{token.lexema,"---------",token.linha + "",token.coluna_ini + "",token.coluna_fim+"",token.erro.name()});
+
+        for (Token token : tokens) {
+            if (token.erro == null) {
+                modelo.addRow(new String[]{token.lexema, token.tipo.name(), token.linha + "", token.coluna_ini + "", token.coluna_fim + "", "------"});
+            } else {
+                modelo.addRow(new String[]{token.lexema, "---------", token.linha + "", token.coluna_ini + "", token.coluna_fim + "", token.erro.name()});
                 //String de erro que irá preencher a area de erro
                 //O resultado é algo como:
                 //"ERRO: 4:2 "x" => Não pertence ao alfabeto
-                erro += "ERRO: "+token.linha+":"+token.coluna_ini+" \""+token.lexema+"\" => "+token.erro.name()+"\n";
+                erro += "ERRO: " + token.linha + ":" + token.coluna_ini + " \"" + token.lexema + "\" => " + token.erro.name() + "\n";
+                Pattern p;
+                //O regex de { requer o uso de \\, ogo tratamos como um caso especial
+                if (token.erro == Token.Erro.Comentario_Nao_Fechado) {
+                    p = Pattern.compile("\\{");
+                } else {
+                    p = Pattern.compile(token.lexema);
+                }
+
                 //Pesquisa pelo erro
-                Pattern p = Pattern.compile(token.lexema);  
                 Matcher m = p.matcher(str);
                 //Para cada ocorrencia do erro, ele vai deixar vermelho e em negrito
                 while (m.find()) {
@@ -208,21 +213,20 @@ public class Editor extends javax.swing.JFrame {
         }
         //Joga tudo pra tabela
         TabelaAnalise.setModel(modelo);
-        
+
         //Se ocorreu um erro
-        if(erro != "")
-        {
+        if (erro != "") {
             //Deixa o texto vermelho e insere o texto de erro no jpane
             ErroPane.setCharacterAttributes(attributes, false);
             ErroPane.setText(erro);
             ResultadosTab.setSelectedIndex(1);
-        }else{
+        } else {
             //Se nao houve erros, limpa jpane e coloca a aba na tabela
             ErroPane.setText("");
             ResultadosTab.setSelectedIndex(0);
         }
-        
-        
+
+
     }//GEN-LAST:event_LexicoMenuActionPerformed
 
     private void AbrirArquivoMenuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_AbrirArquivoMenuActionPerformed
@@ -244,6 +248,7 @@ public class Editor extends javax.swing.JFrame {
                 String conteudo = new Scanner(file).useDelimiter("\\Z").next();
                 //Joga o conteudo na textArea das equacoes
                 EditorTexto.setText(conteudo);
+                this.coloreCodigo();
             } catch (FileNotFoundException ex) {
                 Logger.getLogger(Editor.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -255,14 +260,21 @@ public class Editor extends javax.swing.JFrame {
     }//GEN-LAST:event_EditorTextoKeyPressed
 
     private void EditorTextoKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_EditorTextoKeyReleased
+        //Evita colorir em teclas especiais, como f5 
+        if (!evt.isActionKey()) {
+            this.coloreCodigo();
+        }
+    }//GEN-LAST:event_EditorTextoKeyReleased
+
+    private void coloreCodigo() {
         //Pega todo texto
         String str = EditorTexto.getText();
-        
-       //Lista de tudo que queremos colorir
-       String[] comandos = {"\\bprogram\\b","\\bvar\\b","\\bprocedure\\b","\\binteger\\b","\\bint\\b","\\breal\\b","\\bboolean\\b",
-           "\\btrue\\b","\\bfalse\\b","\\bread\\b","\\bwrite\\b","\\bbegin\\b","\\bend\\b","\\bif\\b","\\bthen\\b","\\belse\\b","\\bwhile\\b","\\bdo\\b",
-       "\\band\\b","\\bor\\b","\\bdiv\\b","\\bnot\\b"};
-        
+
+        //Lista de tudo que queremos colorir
+        String[] comandos = {"\\bprogram\\b", "\\bvar\\b", "\\bprocedure\\b", "\\binteger\\b", "\\bint\\b", "\\breal\\b", "\\bboolean\\b",
+            "\\btrue\\b", "\\bfalse\\b", "\\bread\\b", "\\bwrite\\b", "\\bbegin\\b", "\\bend\\b", "\\bif\\b", "\\bthen\\b", "\\belse\\b", "\\bwhile\\b", "\\bdo\\b",
+            "\\band\\b", "\\bor\\b", "\\bdiv\\b", "\\bnot\\b"};
+
         MutableAttributeSet attributes = new SimpleAttributeSet();
         //Pinta de preto e sem realce
         StyleConstants.setForeground(attributes, Color.black);
@@ -271,20 +283,17 @@ public class Editor extends javax.swing.JFrame {
         //Pinta de azul e deixa negrito
         StyleConstants.setForeground(attributes, Color.blue);
         StyleConstants.setBold(attributes, true);
-        for(String c:comandos)
-        {
+        for (String c : comandos) {
             //Localiza o padrao para realcar
-            Pattern p = Pattern.compile(c);  
+            Pattern p = Pattern.compile(c);
             Matcher m = p.matcher(str);
             //Para cada ocorrencia do erro, ele vai deixar vermelho e em negrito
             while (m.find()) {
-                syntaxHigh.setCharacterAttributes(m.start(), c.length()-4, attributes, true);
+                syntaxHigh.setCharacterAttributes(m.start(), c.length() - 4, attributes, true);
             }
         }
-        
-    }//GEN-LAST:event_EditorTextoKeyReleased
+    }
 
-    
     /**
      * @param args the command line arguments
      */
@@ -317,7 +326,7 @@ public class Editor extends javax.swing.JFrame {
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
                 new Editor().setVisible(true);
-                
+
             }
         });
     }
