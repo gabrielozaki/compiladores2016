@@ -62,6 +62,8 @@ public class Editor extends javax.swing.JFrame {
         AbrirArquivoMenu = new javax.swing.JMenuItem();
         AnalisadoresMenu = new javax.swing.JMenu();
         LexicoMenu = new javax.swing.JMenuItem();
+        AjudaMenu = new javax.swing.JMenu();
+        Definições = new javax.swing.JMenuItem();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -121,6 +123,18 @@ public class Editor extends javax.swing.JFrame {
         AnalisadoresMenu.add(LexicoMenu);
 
         BarraMenu.add(AnalisadoresMenu);
+
+        AjudaMenu.setText("Ajuda");
+
+        Definições.setText("Sobre");
+        Definições.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                DefiniçõesActionPerformed(evt);
+            }
+        });
+        AjudaMenu.add(Definições);
+
+        BarraMenu.add(AjudaMenu);
 
         setJMenuBar(BarraMenu);
 
@@ -266,6 +280,12 @@ public class Editor extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_EditorTextoKeyReleased
 
+    private void DefiniçõesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_DefiniçõesActionPerformed
+        // TODO add your handling code here:
+        Sobre s = new Sobre();
+        s.setVisible(rootPaneCheckingEnabled);
+    }//GEN-LAST:event_DefiniçõesActionPerformed
+
     private void coloreCodigo() {
         //Pega todo texto
         String str = EditorTexto.getText();
@@ -333,9 +353,11 @@ public class Editor extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JMenuItem AbrirArquivoMenu;
+    private javax.swing.JMenu AjudaMenu;
     private javax.swing.JMenu AnalisadoresMenu;
     private javax.swing.JMenu ArquivoMenu;
     private javax.swing.JMenuBar BarraMenu;
+    private javax.swing.JMenuItem Definições;
     private javax.swing.JTextPane EditorTexto;
     private javax.swing.JTextPane ErroPane;
     private javax.swing.JMenuItem LexicoMenu;
