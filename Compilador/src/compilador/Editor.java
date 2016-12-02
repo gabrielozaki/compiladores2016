@@ -1,6 +1,8 @@
 package compilador;
 
 import java.awt.Color;
+import java.awt.Component;
+import java.awt.Dimension;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.List;
@@ -10,7 +12,9 @@ import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.swing.JFileChooser;
+import javax.swing.JTable;
 import javax.swing.WindowConstants;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.text.DefaultStyledDocument;
 import javax.swing.text.MutableAttributeSet;
@@ -62,6 +66,8 @@ public class Editor extends javax.swing.JFrame {
         AbrirArquivoMenu = new javax.swing.JMenuItem();
         AnalisadoresMenu = new javax.swing.JMenu();
         LexicoMenu = new javax.swing.JMenuItem();
+        AjudaMenu = new javax.swing.JMenu();
+        Definições = new javax.swing.JMenuItem();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -87,9 +93,6 @@ public class Editor extends javax.swing.JFrame {
         jLabel2.setText("Saída");
 
         EditorTexto.addKeyListener(new java.awt.event.KeyAdapter() {
-            public void keyPressed(java.awt.event.KeyEvent evt) {
-                EditorTextoKeyPressed(evt);
-            }
             public void keyReleased(java.awt.event.KeyEvent evt) {
                 EditorTextoKeyReleased(evt);
             }
@@ -121,6 +124,18 @@ public class Editor extends javax.swing.JFrame {
         AnalisadoresMenu.add(LexicoMenu);
 
         BarraMenu.add(AnalisadoresMenu);
+
+        AjudaMenu.setText("Ajuda");
+
+        Definições.setText("Sobre");
+        Definições.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                DefiniçõesActionPerformed(evt);
+            }
+        });
+        AjudaMenu.add(Definições);
+
+        BarraMenu.add(AjudaMenu);
 
         setJMenuBar(BarraMenu);
 
@@ -191,6 +206,7 @@ public class Editor extends javax.swing.JFrame {
                 modelo.addRow(new String[]{token.lexema, token.tipo.name(), token.linha + "", token.coluna_ini + "", token.coluna_fim + "", "------"});
             } else {
                 modelo.addRow(new String[]{token.lexema, "---------", token.linha + "", token.coluna_ini + "", token.coluna_fim + "", token.erro.name()});
+
                 //String de erro que irá preencher a area de erro
                 //O resultado é algo como:
                 //"ERRO: 4:2 "x" => Não pertence ao alfabeto
@@ -213,13 +229,41 @@ public class Editor extends javax.swing.JFrame {
         }
         //Joga tudo pra tabela
         TabelaAnalise.setModel(modelo);
-
         //Se ocorreu um erro
         if (erro != "") {
             //Deixa o texto vermelho e insere o texto de erro no jpane
             ErroPane.setCharacterAttributes(attributes, false);
             ErroPane.setText(erro);
             ResultadosTab.setSelectedIndex(1);
+
+            //Pra poder alterar a cor de uma linha em um JTable, temos que criar um novo renderer
+            //Essa implementação cria como se fosse uma clase filha do Renderer default
+            //Referencias:
+            //http://stackoverflow.com/questions/24848314/change-background-color-of-jtable-row-based-on-column-value
+            //
+            TabelaAnalise.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
+                @Override
+                //Aqui ele vai dar um tratamento em cada componente
+                public Component getTableCellRendererComponent(JTable table,
+                        Object value, boolean isSelected, boolean hasFocus, int row, int col) {
+                    //pega os atributos da classe pai
+                    super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, col);
+                    //Pega o valor da coluna lexema
+                    String status = (String) table.getModel().getValueAt(row, 1);
+                    //Se for igual a nossa STRING de quando ocorre erro
+                    if ("---------".equals(status)) {
+                        //Pinta de vermelho
+                        setBackground(Color.RED);
+                        setForeground(Color.WHITE);
+                    } else {
+                        //Se não segue os valores default
+                        setBackground(table.getBackground());
+                        setForeground(table.getForeground());
+                    }
+                    return this;
+                }
+            });
+
         } else {
             //Se nao houve erros, limpa jpane e coloca a aba na tabela
             ErroPane.setText("");
@@ -253,11 +297,17 @@ public class Editor extends javax.swing.JFrame {
                 Logger.getLogger(Editor.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
+        DefaultTableModel modelo = new javax.swing.table.DefaultTableModel();
+        modelo.addColumn("Lexema");
+        modelo.addColumn("Token");
+        modelo.addColumn("Linha");
+        modelo.addColumn("Coluna Inicial");
+        modelo.addColumn("Coluna Final");
+        modelo.addColumn("Erro");
+
+        TabelaAnalise.setModel(modelo);
+
     }//GEN-LAST:event_AbrirArquivoMenuActionPerformed
-
-    private void EditorTextoKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_EditorTextoKeyPressed
-
-    }//GEN-LAST:event_EditorTextoKeyPressed
 
     private void EditorTextoKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_EditorTextoKeyReleased
         //Evita colorir em teclas especiais, como f5 
@@ -265,6 +315,12 @@ public class Editor extends javax.swing.JFrame {
             this.coloreCodigo();
         }
     }//GEN-LAST:event_EditorTextoKeyReleased
+
+    private void DefiniçõesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_DefiniçõesActionPerformed
+        // TODO add your handling code here:
+        Sobre s = new Sobre();
+        s.setVisible(rootPaneCheckingEnabled);
+    }//GEN-LAST:event_DefiniçõesActionPerformed
 
     private void coloreCodigo() {
         //Pega todo texto
@@ -333,9 +389,11 @@ public class Editor extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JMenuItem AbrirArquivoMenu;
+    private javax.swing.JMenu AjudaMenu;
     private javax.swing.JMenu AnalisadoresMenu;
     private javax.swing.JMenu ArquivoMenu;
     private javax.swing.JMenuBar BarraMenu;
+    private javax.swing.JMenuItem Definições;
     private javax.swing.JTextPane EditorTexto;
     private javax.swing.JTextPane ErroPane;
     private javax.swing.JMenuItem LexicoMenu;

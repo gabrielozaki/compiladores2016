@@ -40,6 +40,21 @@
             </MenuItem>
           </SubComponents>
         </Menu>
+        <Menu class="javax.swing.JMenu" name="AjudaMenu">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="Ajuda"/>
+          </Properties>
+          <SubComponents>
+            <MenuItem class="javax.swing.JMenuItem" name="Defini&#xe7;&#xf5;es">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="Sobre"/>
+              </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="Defini&#xe7;&#xf5;esActionPerformed"/>
+              </Events>
+            </MenuItem>
+          </SubComponents>
+        </Menu>
       </SubComponents>
     </Menu>
   </NonVisualComponents>
@@ -213,7 +228,6 @@
       <SubComponents>
         <Component class="javax.swing.JTextPane" name="EditorTexto">
           <Events>
-            <EventHandler event="keyPressed" listener="java.awt.event.KeyListener" parameters="java.awt.event.KeyEvent" handler="EditorTextoKeyPressed"/>
             <EventHandler event="keyReleased" listener="java.awt.event.KeyListener" parameters="java.awt.event.KeyEvent" handler="EditorTextoKeyReleased"/>
           </Events>
           <AuxValues>

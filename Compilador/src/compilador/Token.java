@@ -65,6 +65,8 @@ public class Token {
         Ponto_Virgula(";"),
         Virgula(","),
         
+        //Strings
+        Texto("\""),
         //Comentarios
         Chaves_Abre("\\{"),
         Chaves_Fecha("\\}"),
@@ -99,6 +101,7 @@ public class Token {
     public static enum Erro{
         Nao_Pertence_Alfabeto,
         Comentario_Nao_Fechado,
+        Texto_Nao_Fechado,
         Identificador_Overflow,
         Numero_Overflow;
         

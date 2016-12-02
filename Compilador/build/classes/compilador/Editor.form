@@ -40,6 +40,21 @@
             </MenuItem>
           </SubComponents>
         </Menu>
+        <Menu class="javax.swing.JMenu" name="AjudaMenu">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="Ajuda"/>
+          </Properties>
+          <SubComponents>
+            <MenuItem class="javax.swing.JMenuItem" name="Defini&#xe7;&#xf5;es">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="Sobre"/>
+              </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="Defini&#xe7;&#xf5;esActionPerformed"/>
+              </Events>
+            </MenuItem>
+          </SubComponents>
+        </Menu>
       </SubComponents>
     </Menu>
   </NonVisualComponents>
