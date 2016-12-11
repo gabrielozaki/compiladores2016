@@ -15,37 +15,6 @@ public class AnalisadorSintatico {
 
     private AnalisadorLexico al = new AnalisadorLexico();
 
-    private enum Gramatica{
-        //BNF Utilizada:
-        //http://www2.fct.unesp.br/docentes/dmec/olivete/compiladores/arquivos/LALG.pdf
-        //O nome do enum sera a o nome da regra e seu parametro a regra em si
-        //Os tipos não terminais estarào identificados com < >, para facilitar a implementacao
-        //Ex:
-        //<programa> := program <identificador>;<bloco>.
-        programa("program <identificador>;<bloco>."),
-        //Em alguns pontos será necessário adaptar a BNF
-        //O do bloco possui trechos opcionais
-        //então temos:
-        //A = BCD|BD|CD
-        bloco("<parte_declara_variaveis><declara_sub><comando_composto>|"
-                + "<parte_declara_variaveis><comando_composto>|"
-                + "<declara_sub><comando_composto>|"
-                + "<comando_composto>"),
-        tipo("<identificador>"),
-        //Aqui temos um caso de recursao do tipo:
-        //A = aA|a
-        parte_declara_variaveis(" var <declara_variaveis>;<parte_declara_variaveis>|var <declara_variaveis>;");
-        
-        
-        public final String regra;
-        
-        //E considerada uma boa pratica de programacao proteger o construtor do enum
-        //Garantindo assim tipos estaticos
-        private Gramatica(String regra){
-            this.regra = regra;
-        }
-    }
-    
     public static void AnalisadorSintatico() {
         //so cria o construtor
     }
@@ -58,11 +27,54 @@ public class AnalisadorSintatico {
         return al.getListaToken();
     }
 
-    public void getGramatica() {
+    public void executaAnalise() {
+        boolean status;
         Token t = al.getToken();;
-        while (t != null) {
+        /*while (t != null) {
             System.out.println(t.lexema);
             t = al.getToken();
+        }*/
+        status = programa(t);
+        
+        if(status){
+            System.out.println("Sucesso");
         }
+        
+    }
+    
+    private boolean programa(Token t){
+        boolean prog,ident,pontvirgula,bloc;
+        
+        if(t.tipo == Token.Tipo.Programa){
+            prog = true;
+            ident = identificador(al.getToken());
+            t = al.getToken();
+            pontvirgula = (t.tipo == Token.Tipo.Ponto_Virgula);
+            bloc = bloco(al.getToken());
+            return (prog && ident && pontvirgula && bloc);
+        }
+        return false;
+    }
+    
+    private boolean bloco(Token t){
+        System.out.println(t.lexema);
+        return true;
+    }
+    
+    private boolean tipo(Token t){
+        return identificador(t);
+    }
+
+    
+    private boolean listaExpressoes(Token t){
+        return true;
+    }
+    
+    private boolean numero(Token t){
+        return (t.tipo == Token.Tipo.Numero_Real || t.tipo == Token.Tipo.Numero_Inteiro);
+    }
+    
+    private boolean identificador(Token t){
+        return (t.tipo == Token.Tipo.Identificador);
     }
 }

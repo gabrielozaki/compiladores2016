@@ -334,7 +334,7 @@ public class Editor extends javax.swing.JFrame {
 
     private void SintaticoMenuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_SintaticoMenuActionPerformed
         // TODO add your handling code here:
-        as.getGramatica();
+        as.executaAnalise();
     }//GEN-LAST:event_SintaticoMenuActionPerformed
 
     private void coloreCodigo() {
