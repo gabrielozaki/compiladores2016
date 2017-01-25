@@ -34,7 +34,7 @@ public class AnalisadorSintatico {
             System.out.println(t.lexema);
             t = al.getToken();
         }*/
-        status = programa(t);
+        status = program(t);
         
         if(status){
             System.out.println("Sucesso");
@@ -42,39 +42,145 @@ public class AnalisadorSintatico {
         
     }
     
-    private boolean programa(Token t){
-        boolean prog,ident,pontvirgula,bloc;
-        
-        if(t.tipo == Token.Tipo.Programa){
-            prog = true;
-            ident = identificador(al.getToken());
-            t = al.getToken();
-            pontvirgula = (t.tipo == Token.Tipo.Ponto_Virgula);
-            bloc = bloco(al.getToken());
-            return (prog && ident && pontvirgula && bloc);
-        }
-        return false;
+    private boolean program(Token t){
+    	return true;
     }
     
     private boolean bloco(Token t){
-        System.out.println(t.lexema);
-        return true;
+    	return true;
     }
     
     private boolean tipo(Token t){
-        return identificador(t);
+    	return true;
     }
 
-    
-    private boolean listaExpressoes(Token t){
-        return true;
+    private boolean parteDeclVar(Token t){
+    	return true;
     }
     
-    private boolean numero(Token t){
-        return (t.tipo == Token.Tipo.Numero_Real || t.tipo == Token.Tipo.Numero_Inteiro);
+    private boolean declVarLoop(Token t){
+    	return true;
     }
     
-    private boolean identificador(Token t){
-        return (t.tipo == Token.Tipo.Identificador);
+    private boolean declVar(Token t){
+    	return true;
     }
+    
+    private boolean listaIdent(Token t){
+    	return true;
+    }
+    
+    private boolean identLoop(Token t){
+    	return true;
+    }
+    
+    private boolean declProc(Token t){
+    	return true;
+    }
+    
+    private boolean paramForm(Token t){
+    	return true;
+    }
+    
+    private boolean secParamFormLoop(Token t){
+    	return true;
+    }
+    
+    private boolean SecParamForm(Token t){
+    	return true;
+    }
+    
+    private boolean CmdComposto(Token t){
+    	return true;
+    }
+    
+    private boolean cmdLoop(Token t){
+    	return true;
+    }
+    
+    private boolean comando(Token t){
+    	return true;
+    }
+    
+    private boolean startIdent(Token t){
+    	return true;
+    }
+    
+    private boolean optIdent(Token t){
+    	return true;
+    }
+    
+    private boolean optListaExp(Token t){
+    	return true;
+    }
+    
+    private boolean cmdCond(Token t){
+    	return true;
+    }
+    
+    private boolean elseCmdOpt(Token t){
+    	return true;
+    }
+    
+    private boolean cmdRep(Token t){
+    	return true;
+    }
+    
+    private boolean expressao(Token t){
+    	return true;
+    }
+    
+    private boolean relaOpt(Token t){
+    	return true;
+    }
+    
+    private boolean relacao(Token t){
+    	return true;
+    }
+    
+    private boolean expSimpl(Token t){
+    	return true;
+    }
+    
+    private boolean sinalNOpt(Token t){
+    	return true;
+    }
+    
+    private boolean sinalOpt(Token t){
+    	return true;
+    }
+    
+    private boolean termoLoop(Token t){
+    	return true;
+    }
+    
+    private boolean termo(Token t){
+    	return true;
+    }
+    
+    private boolean fatorLoop(Token t){
+    	return true;
+    }
+    
+    private boolean variavel(Token t){
+    	return true;
+    }
+    
+    private boolean fator(Token t){
+    	return true;
+    }
+    
+    private boolean exprOpt(Token t){
+    	return true;
+    }
+    
+    private boolean listaExp(Token t){
+    	return true;
+    }
+    
+    private boolean exprLoop(Token t){
+    	return true;
+    }
+    
+    
 }
