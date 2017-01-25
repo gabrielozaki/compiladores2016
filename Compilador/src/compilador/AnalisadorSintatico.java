@@ -368,6 +368,7 @@ public class AnalisadorSintatico {
     		getToken();
     		if(listaExp()){
     			if(t.tipo == Token.Tipo.Parenteses_Fecha){
+    				getToken();
     				return true;
     			}else{
     				return false;
