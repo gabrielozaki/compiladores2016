@@ -40,6 +40,7 @@ public class Token {
         //Declaracao de comando composto 11
         Composto_inicio("begin"),
         Composto_fim("end"),
+        Composto_fim_codigo("end."),
         //Declaracao de condicao 15
         Condicional("if"),
         Condicionalt("then"),

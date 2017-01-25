@@ -42,6 +42,8 @@ public class Editor extends javax.swing.JFrame {
     }
     //Cria tabela de estilos para o editor
     private StyledDocument syntaxHigh = (StyledDocument) new DefaultStyledDocument();
+    //Cria uma instancia do analisador sintatico, que ira passar os dados para o lexico
+    AnalisadorSintatico as = new AnalisadorSintatico();
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -66,6 +68,7 @@ public class Editor extends javax.swing.JFrame {
         AbrirArquivoMenu = new javax.swing.JMenuItem();
         AnalisadoresMenu = new javax.swing.JMenu();
         LexicoMenu = new javax.swing.JMenuItem();
+        SintaticoMenu = new javax.swing.JMenuItem();
         AjudaMenu = new javax.swing.JMenu();
         Definições = new javax.swing.JMenuItem();
 
@@ -123,6 +126,15 @@ public class Editor extends javax.swing.JFrame {
         });
         AnalisadoresMenu.add(LexicoMenu);
 
+        SintaticoMenu.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_F6, 0));
+        SintaticoMenu.setText("Analise Sintatica");
+        SintaticoMenu.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                SintaticoMenuActionPerformed(evt);
+            }
+        });
+        AnalisadoresMenu.add(SintaticoMenu);
+
         BarraMenu.add(AnalisadoresMenu);
 
         AjudaMenu.setText("Ajuda");
@@ -175,14 +187,12 @@ public class Editor extends javax.swing.JFrame {
     private void LexicoMenuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_LexicoMenuActionPerformed
         //Obtem as equacoes
         //Trocar a textArea no futuro por um JPaneText?
-        String str = EditorTexto.getText();
-
-        //Cria uma instancia do analisador sintatico, que ira passar os dados para o lexico
-        AnalisadorSintatico as = new AnalisadorSintatico();
-
+        String str = EditorTexto.getText()+"\n";
+        //Pra limpar
+        this.as = new AnalisadorSintatico();
         //Recebe uma lista de tokens 
-        as.populaLexico(str);
-        List<Token> tokens = as.apenasLexico();
+        this.as.populaLexico(str);
+        List<Token> tokens = this.as.apenasLexico();
 
         //Construimos novamente a tabela de simbolos, para poder preenche-la no for abaixo
         DefaultTableModel modelo = new javax.swing.table.DefaultTableModel();
@@ -306,7 +316,7 @@ public class Editor extends javax.swing.JFrame {
         modelo.addColumn("Erro");
 
         TabelaAnalise.setModel(modelo);
-
+        this.as = new AnalisadorSintatico();
     }//GEN-LAST:event_AbrirArquivoMenuActionPerformed
 
     private void EditorTextoKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_EditorTextoKeyReleased
@@ -321,6 +331,11 @@ public class Editor extends javax.swing.JFrame {
         Sobre s = new Sobre();
         s.setVisible(rootPaneCheckingEnabled);
     }//GEN-LAST:event_DefiniçõesActionPerformed
+
+    private void SintaticoMenuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_SintaticoMenuActionPerformed
+        // TODO add your handling code here:
+        as.executaAnalise();
+    }//GEN-LAST:event_SintaticoMenuActionPerformed
 
     private void coloreCodigo() {
         //Pega todo texto
@@ -398,6 +413,7 @@ public class Editor extends javax.swing.JFrame {
     private javax.swing.JTextPane ErroPane;
     private javax.swing.JMenuItem LexicoMenu;
     private javax.swing.JTabbedPane ResultadosTab;
+    private javax.swing.JMenuItem SintaticoMenu;
     private javax.swing.JTable TabelaAnalise;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
