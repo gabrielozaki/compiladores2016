@@ -44,7 +44,7 @@ public class AnalisadorSintatico {
     }
     
     private boolean program(){
-    	System.out.println("program");
+    	//System.out.println("program");
     	boolean bloco;
     	if(t.tipo == Token.Tipo.Programa){
     		getToken();
@@ -95,7 +95,10 @@ public class AnalisadorSintatico {
     
     private boolean tipo(){
     	System.out.println("tipo");
-    	if(t.tipo == Token.Tipo.Identificador){
+    	if(t.tipo == Token.Tipo.Identificador || 
+    			t.tipo == Token.Tipo.Inteiro || 
+    			t.tipo == Token.Tipo.Real || 
+    			t.tipo == Token.Tipo.Booleano){
     		getToken();
     		return true;
     	}else{
@@ -124,6 +127,7 @@ public class AnalisadorSintatico {
     
     //
     private boolean declVarLoop(){
+    	System.out.println("partDeclLoop");
     	if(t.tipo == Token.Tipo.Ponto_Virgula){
     		getToken();
     		if(declVar()){
@@ -141,6 +145,7 @@ public class AnalisadorSintatico {
     }
     
     private boolean declVar(){
+    	System.out.println("declVar");
     	if(tipo()){
     		if(listaIdent()){
     			return true;
@@ -154,6 +159,7 @@ public class AnalisadorSintatico {
     }
     
     private boolean listaIdent(){
+    	System.out.println("listaIdent");
     	if(t.tipo == Token.Tipo.Identificador){
     		getToken();
     		if(identLoop()){
@@ -167,6 +173,7 @@ public class AnalisadorSintatico {
     }
     
     private boolean identLoop(){
+    	System.out.println("identLoop");
     	if(t.tipo == Token.Tipo.Virgula){
     		getToken();
     		if(t.tipo == Token.Tipo.Identificador){
@@ -188,6 +195,7 @@ public class AnalisadorSintatico {
     
     //procedure identificador PARAM_FORM ; BLOCO ; | ε
     private boolean declProc(){
+    	System.out.println("declProc");
     	if(t.tipo == Token.Tipo.Procedure){
     		getToken();
     		if(t.tipo == Token.Tipo.Identificador){
@@ -222,6 +230,7 @@ public class AnalisadorSintatico {
     
     //(SEC_PARAM_FORM SEC_PARAM_FORM_LOOP ) | ε
     private boolean paramForm(){
+    	System.out.println("paramForm");
     	if(secParamForm()){
     		if(secParamFormLoop()){
     			return true;
@@ -235,6 +244,7 @@ public class AnalisadorSintatico {
     
     //; SEC_PARAM_FORM SEC_PARAM_FORM_LOOP | ε
     private boolean secParamFormLoop(){
+    	System.out.println("secParamFormLoop");
     	if(t.tipo == Token.Tipo.Ponto_Virgula){
     		getToken();
     		if(secParamForm()){
@@ -255,6 +265,7 @@ public class AnalisadorSintatico {
     
     //var LISTA_IDENT : identificador | LISTA_IDENT : identificador
     private boolean secParamForm(){
+    	System.out.println("secParamForm");
     	if(t.tipo == Token.Tipo.Variavel){
     		getToken();
     		if(listaIdent()){
@@ -292,6 +303,7 @@ public class AnalisadorSintatico {
     
     //begin COMANDO CMD_LOOP end
     private boolean cmdComposto(){
+    	System.out.println("cmdComposto");
     	if(t.tipo == Token.Tipo.Composto_inicio){
     		getToken();
     		if(comando()){
@@ -706,6 +718,6 @@ public class AnalisadorSintatico {
     
     private void getToken(){
     	t = al.getToken();
-    	System.out.println(t.lexema);
+    	System.out.println("*"+t.lexema);
     }
 }
