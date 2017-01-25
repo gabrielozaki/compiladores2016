@@ -48,7 +48,13 @@ public class AnalisadorSintatico {
     	boolean bloco;
     	if(t.tipo == Token.Tipo.Programa){
     		getToken();
-    		if(t.tipo == Token.Tipo.Identificador){
+    		if(t.tipo == Token.Tipo.Identificador || 
+    			t.tipo == Token.Tipo.Inteiro || 
+    			t.tipo == Token.Tipo.Real || 
+                        t.tipo == Token.Tipo.Valor_Boleano || 
+                        t.tipo == Token.Tipo.Leitura || 
+                        t.tipo == Token.Tipo.Escrita || 
+    			t.tipo == Token.Tipo.Booleano){
     			getToken();
     			if(t.tipo == Token.Tipo.Ponto_Virgula){
     				getToken();
@@ -95,7 +101,13 @@ public class AnalisadorSintatico {
     
     private boolean tipo(){
     	System.out.println("tipo");
-    	if(t.tipo == Token.Tipo.Identificador){
+    	if(t.tipo == Token.Tipo.Identificador || 
+    			t.tipo == Token.Tipo.Inteiro || 
+    			t.tipo == Token.Tipo.Real || 
+                        t.tipo == Token.Tipo.Valor_Boleano || 
+                        t.tipo == Token.Tipo.Leitura || 
+                        t.tipo == Token.Tipo.Escrita || 
+    			t.tipo == Token.Tipo.Booleano){
     		getToken();
     		return true;
     	}else{
@@ -106,13 +118,13 @@ public class AnalisadorSintatico {
     private boolean parteDeclVar(){
     	System.out.println("partDeclVar");
     	if(declVar()){
-    		if(declVarLoop()){
-    			if(t.tipo == Token.Tipo.Ponto_Virgula){
-    				getToken();
-    				return true;
-    			}else{
-    				return false;
-    			}
+            if(t.tipo == Token.Tipo.Ponto_Virgula){
+                getToken();
+                    if(parteDeclVar()){
+                            return true;
+                    }else{
+                            return false;
+                    }
     		}else{
     			return false;
     		}
@@ -122,8 +134,9 @@ public class AnalisadorSintatico {
     	}
     }
     
-    //
+    /*//
     private boolean declVarLoop(){
+    	System.out.println("partDeclLoop");
     	if(t.tipo == Token.Tipo.Ponto_Virgula){
     		getToken();
     		if(declVar()){
@@ -138,9 +151,10 @@ public class AnalisadorSintatico {
     	}else{
     		return true;
     	}
-    }
+    }*/
     
     private boolean declVar(){
+    	System.out.println("declVar");
     	if(tipo()){
     		if(listaIdent()){
     			return true;
@@ -154,7 +168,14 @@ public class AnalisadorSintatico {
     }
     
     private boolean listaIdent(){
-    	if(t.tipo == Token.Tipo.Identificador){
+    	System.out.println("listaIdent");
+    	if(t.tipo == Token.Tipo.Identificador || 
+    			t.tipo == Token.Tipo.Inteiro || 
+    			t.tipo == Token.Tipo.Real || 
+                        t.tipo == Token.Tipo.Valor_Boleano || 
+                        t.tipo == Token.Tipo.Leitura || 
+                        t.tipo == Token.Tipo.Escrita || 
+    			t.tipo == Token.Tipo.Booleano){
     		getToken();
     		if(identLoop()){
     			return true;
@@ -167,9 +188,16 @@ public class AnalisadorSintatico {
     }
     
     private boolean identLoop(){
+    	System.out.println("identLoop");
     	if(t.tipo == Token.Tipo.Virgula){
     		getToken();
-    		if(t.tipo == Token.Tipo.Identificador){
+    		if(t.tipo == Token.Tipo.Identificador || 
+    			t.tipo == Token.Tipo.Inteiro || 
+    			t.tipo == Token.Tipo.Real || 
+                        t.tipo == Token.Tipo.Valor_Boleano || 
+                        t.tipo == Token.Tipo.Leitura || 
+                        t.tipo == Token.Tipo.Escrita || 
+    			t.tipo == Token.Tipo.Booleano){
     			getToken();
     			if(identLoop()){
     				return true;
@@ -188,9 +216,16 @@ public class AnalisadorSintatico {
     
     //procedure identificador PARAM_FORM ; BLOCO ; | ε
     private boolean declProc(){
+    	System.out.println("declProc");
     	if(t.tipo == Token.Tipo.Procedure){
     		getToken();
-    		if(t.tipo == Token.Tipo.Identificador){
+    		if(t.tipo == Token.Tipo.Identificador || 
+    			t.tipo == Token.Tipo.Inteiro || 
+    			t.tipo == Token.Tipo.Real || 
+                        t.tipo == Token.Tipo.Valor_Boleano || 
+                        t.tipo == Token.Tipo.Leitura || 
+                        t.tipo == Token.Tipo.Escrita || 
+    			t.tipo == Token.Tipo.Booleano){
     			getToken();
     			if(paramForm()){
     				if(t.tipo == Token.Tipo.Ponto_Virgula){
@@ -222,12 +257,23 @@ public class AnalisadorSintatico {
     
     //(SEC_PARAM_FORM SEC_PARAM_FORM_LOOP ) | ε
     private boolean paramForm(){
-    	if(secParamForm()){
+    	System.out.println("paramForm");
+        if (t.tipo == Token.Tipo.Parenteses_Abre){
+            getToken();
+            if(secParamForm()){
     		if(secParamFormLoop()){
-    			return true;
+                    if (t.tipo == Token.Tipo.Parenteses_Fecha){
+                        getToken();
+                        return true;
+                    }else{
+                        return false;
+                    }
     		}else{
     			return false;
     		}
+            }else{
+                return false;
+            }
     	}else{
     		return true;
     	}
@@ -235,6 +281,7 @@ public class AnalisadorSintatico {
     
     //; SEC_PARAM_FORM SEC_PARAM_FORM_LOOP | ε
     private boolean secParamFormLoop(){
+    	System.out.println("secParamFormLoop"); 
     	if(t.tipo == Token.Tipo.Ponto_Virgula){
     		getToken();
     		if(secParamForm()){
@@ -255,12 +302,19 @@ public class AnalisadorSintatico {
     
     //var LISTA_IDENT : identificador | LISTA_IDENT : identificador
     private boolean secParamForm(){
+    	System.out.println("secParamForm");
     	if(t.tipo == Token.Tipo.Variavel){
     		getToken();
     		if(listaIdent()){
     			if(t.tipo == Token.Tipo.Dois_Pontos){
     				getToken();
-    				if(t.tipo == Token.Tipo.Identificador){
+    				if(t.tipo == Token.Tipo.Identificador || 
+                                    t.tipo == Token.Tipo.Inteiro || 
+                                    t.tipo == Token.Tipo.Real || 
+                                    t.tipo == Token.Tipo.Valor_Boleano || 
+                                    t.tipo == Token.Tipo.Leitura || 
+                                    t.tipo == Token.Tipo.Escrita || 
+                                    t.tipo == Token.Tipo.Booleano){
     					getToken();
     					return true;
     				}else{
@@ -275,7 +329,13 @@ public class AnalisadorSintatico {
     	}else if(listaIdent()){
     		if(t.tipo == Token.Tipo.Dois_Pontos){
     			getToken();
-    			if(t.tipo == Token.Tipo.Identificador){
+    			if(t.tipo == Token.Tipo.Identificador || 
+                            t.tipo == Token.Tipo.Inteiro || 
+                            t.tipo == Token.Tipo.Real || 
+                            t.tipo == Token.Tipo.Valor_Boleano || 
+                            t.tipo == Token.Tipo.Leitura || 
+                            t.tipo == Token.Tipo.Escrita || 
+                            t.tipo == Token.Tipo.Booleano){
     				getToken();
     				return true;
     			}else{
@@ -292,6 +352,7 @@ public class AnalisadorSintatico {
     
     //begin COMANDO CMD_LOOP end
     private boolean cmdComposto(){
+    	System.out.println("cmdComposto");
     	if(t.tipo == Token.Tipo.Composto_inicio){
     		getToken();
     		if(comando()){
@@ -315,6 +376,7 @@ public class AnalisadorSintatico {
     
     //; COMANDO CMD_LOOP | ε
     private boolean cmdLoop(){
+        System.out.println("cmdLoop");
     	if(t.tipo == Token.Tipo.Ponto_Virgula){
     		getToken();
     		if(comando()){
@@ -334,6 +396,7 @@ public class AnalisadorSintatico {
     
     //START_IDENT | CMD_COMPOSTO | CMD_COND | CMD_REP
     private boolean comando(){
+        System.out.println("comando");
     	if(startIdent()){
     		return true;
     	}else if(cmdComposto()){
@@ -349,7 +412,14 @@ public class AnalisadorSintatico {
     
     //identificador OPT_IDENT
     private boolean startIdent(){
-    	if(t.tipo == Token.Tipo.Identificador){
+        System.out.println("startIdent");
+    	if(t.tipo == Token.Tipo.Identificador || 
+            t.tipo == Token.Tipo.Inteiro || 
+            t.tipo == Token.Tipo.Real || 
+            t.tipo == Token.Tipo.Valor_Boleano || 
+            t.tipo == Token.Tipo.Leitura || 
+            t.tipo == Token.Tipo.Escrita || 
+            t.tipo == Token.Tipo.Booleano){
     		getToken();
     		if(optIdent()){
     			return true;
@@ -363,6 +433,7 @@ public class AnalisadorSintatico {
     
     //:= EXPRESSAO | OPT_LISTA_EXPR | EXPR_OPT
     private boolean optIdent(){
+        System.out.println("optIdent");
     	if(t.tipo == Token.Tipo.Atribuicao){
     		getToken();
     		if(expressao()){
@@ -382,6 +453,7 @@ public class AnalisadorSintatico {
     
     //( LISTA_EXPR ) | ε
     private boolean optListaExp(){
+        System.out.println("optListaExp");
     	if(t.tipo == Token.Tipo.Parenteses_Abre){
     		getToken();
     		if(listaExp()){
@@ -400,14 +472,16 @@ public class AnalisadorSintatico {
     }
     // CMD_COND -> if EXPRESSAO then COMANDO ELSE_CMD_OPT
     private boolean cmdCond(){
+        System.out.println("cmdCond");
     	if (t.tipo == Token.Tipo.Condicional){
             getToken();
             if (expressao()){
                 if (t.tipo == Token.Tipo.Condicionalt){
                     getToken();
                     if (comando()){
-                        if (elseCmdOpt()){
+                        if (elseCmdOpt()){                           
                             return true;
+                            
                         }else{
                             return false;
                         }
@@ -426,6 +500,7 @@ public class AnalisadorSintatico {
     }
     // ELSE_CMD_OPT -> else COMANDO | ε
     private boolean elseCmdOpt(){
+        System.out.println("elseCmdOpt");
     	if (t.tipo == Token.Tipo.Condicionale){
             getToken();
             if (comando()){
@@ -439,6 +514,7 @@ public class AnalisadorSintatico {
     }
     // CMD_REP -> while EXPRESSAO do COMANDO
     private boolean cmdRep(){
+        System.out.println("cmdRep");
     	if (t.tipo == Token.Tipo.Repeticao){
             getToken();
             if (expressao()){
@@ -461,6 +537,7 @@ public class AnalisadorSintatico {
     }
     // EXPRESSAO -> EXPR_SIMPL RELA_OPT
     private boolean expressao(){
+        System.out.println("expressao");
     	if (expSimpl()){
             if (relaOpt()){
                 return true;
@@ -473,6 +550,7 @@ public class AnalisadorSintatico {
     }
     // RELA_OPT -> RELACAO EXPR_SIMPL | ε
     private boolean relaOpt(){
+        System.out.println("relaOpt");
     	if (relacao()){
             if (expSimpl()){
                 return true;
@@ -485,6 +563,7 @@ public class AnalisadorSintatico {
     }
     // RELACAO -> = | <> | < | <= | >= | >
     private boolean relacao(){
+        System.out.println("relacao");
     	if (t.tipo == Token.Tipo.Maior){
             getToken();
             return true;
@@ -500,6 +579,7 @@ public class AnalisadorSintatico {
     }
     // EXPR_SIMPL -> SINAL_OPT TERMO TERMO_LOOP
     private boolean expSimpl(){
+        System.out.println("exprSimpl");
     	if (sinalOpt()){
             if (termo()){
                 if (termoLoop()){
@@ -516,6 +596,7 @@ public class AnalisadorSintatico {
     }
     // SINAL_N_OPT ->  + | - 
     private boolean sinalNOpt(){
+        System.out.println("sinalNOpt");
         if (t.tipo == Token.Tipo.Operador_Soma){
             getToken();
             return true;
@@ -530,15 +611,18 @@ public class AnalisadorSintatico {
 
     // SINAL_OPT ->  SINAL_N_OPT | ε
     private boolean sinalOpt(){
+        System.out.println("sinalOpt");
         if (sinalNOpt()){
             return true;
         }else{
-            return false;
+            // vazio
+            return true;
         }
     	
     }
     // TERMO_LOOP -> SINAL_N_OPT TERMO TERMO_LOOP | or TERMO TERMO_LOOP | ε
     private boolean termoLoop(){
+        System.out.println("termoLoop");
         if (sinalNOpt()){
             if (termo()){
                 if (termoLoop()){
@@ -565,6 +649,7 @@ public class AnalisadorSintatico {
     }
     // TERMO -> FATOR FATOR_LOOP
     private boolean termo(){
+        System.out.println("termo");
     	if (fator()){
             if (fatorLoop()){
                 return true;
@@ -578,6 +663,7 @@ public class AnalisadorSintatico {
     // FATOR_LOOP -> * FATOR FATOR_LOOP | div FATOR FATOR_LOOP | 
     // and FATOR FATOR_LOOP | ε
     private boolean fatorLoop(){
+        System.out.println("fatorLoop");
         if(t.tipo == Token.Tipo.Operador_Multiplicacao){
             getToken();
             if (fator()){
@@ -589,7 +675,7 @@ public class AnalisadorSintatico {
             }else{
                 return false;
             }
-        }else if(t.tipo == Token.Tipo.Operador_Divisao){
+        }else if(t.tipo == Token.Tipo.Div){
             getToken();
             if (fator()){
                 if (fatorLoop()){
@@ -618,7 +704,14 @@ public class AnalisadorSintatico {
     }
     // VARIAVEL -> identificador EXPR_OPT
     private boolean variavel(){
-        if (t.tipo == Token.Tipo.Identificador){
+        System.out.println("variavel");
+        if(t.tipo == Token.Tipo.Identificador || 
+            t.tipo == Token.Tipo.Inteiro || 
+            t.tipo == Token.Tipo.Real || 
+            t.tipo == Token.Tipo.Valor_Boleano || 
+            t.tipo == Token.Tipo.Leitura || 
+            t.tipo == Token.Tipo.Escrita || 
+            t.tipo == Token.Tipo.Booleano){
             getToken();
             if (exprOpt()){
                 return true;
@@ -631,6 +724,7 @@ public class AnalisadorSintatico {
     }
     // FATOR -> VARIAVEL | numero | ( EXPRESSAO ) | not FATOR
     private boolean fator(){
+        System.out.println("fator");
         if (variavel()){
             return true;
         }
@@ -665,6 +759,7 @@ public class AnalisadorSintatico {
     }
     // EXPR_OPT -> EXPRESSAO | ε
     private boolean exprOpt(){
+        System.out.println("exprOpt");
     	if(expressao()){
             return true;
         }else{
@@ -673,6 +768,7 @@ public class AnalisadorSintatico {
     }
     // LISTA_EXPR -> EXPRESSAO EXPR_LOOP
     private boolean listaExp(){
+        System.out.println("listaExp");
         if(expressao()){
             if(exprLoop()){
                 return true;
@@ -685,6 +781,7 @@ public class AnalisadorSintatico {
     }
     // EXPR_LOOP -> , EXPRESSAO EXPR_LOOP | ε
     private boolean exprLoop(){
+        System.out.println("exprLoop");
         if (t.tipo == Token.Tipo.Virgula){
             getToken();
             if(expressao()){
@@ -706,7 +803,7 @@ public class AnalisadorSintatico {
     
     private void getToken(){
     	t = al.getToken();
-        System.out.println("PRINT TOKEN");
-    	System.out.println(t.lexema);
+    	System.out.println("LEXEMA: "+t.lexema);
+        System.out.println("LEXEMA: "+t.tipo);
     }
 }
