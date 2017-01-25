@@ -5,6 +5,7 @@
  */
 package compilador;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -17,6 +18,7 @@ public class AnalisadorSintatico {
 
     private AnalisadorLexico al = new AnalisadorLexico();
     private Token t;
+    private List<String> erro = new ArrayList<String>();
 
     public static void AnalisadorSintatico() {
         //so cria o construtor
@@ -39,55 +41,69 @@ public class AnalisadorSintatico {
         }*/
         status = program();
 
+        for (String e : erro) {
+            System.out.println(e);
+        }
+
         if (status) {
             System.out.println("Sucesso");
+        } else {
+            System.out.println("Falha");
         }
 
     }
 
     private boolean program() {
-        System.out.println("program");
-        boolean bloco;
-        if (t.tipo == Token.Tipo.Programa) {
-            getToken();
-            if (t.tipo == Token.Tipo.Identificador
-                    || t.tipo == Token.Tipo.Inteiro
-                    || t.tipo == Token.Tipo.Real
-                    || t.tipo == Token.Tipo.Valor_Boleano
-                    || t.tipo == Token.Tipo.Leitura
-                    || t.tipo == Token.Tipo.Escrita
-                    || t.tipo == Token.Tipo.Booleano) {
-                getToken();
-                if (t.tipo == Token.Tipo.Ponto_Virgula) {
-                    getToken();
-                    if (bloco()) {
-                        //getToken();
-                        System.out.println("program " + t.lexema);
-                        if (t.tipo == Token.Tipo.Composto_fim_codigo) {
-                            return true;
-                        } else {
-                            //    modoPanico(Token.Tipo.Composto_fim_codigo);
-                            return false;
-                        }
-                    } else {
-                        return false;
-                    }
+        //  System.out.println("program");
 
-                } else {
-                    //modoPanico(Token.Tipo.Ponto_Virgula);
-                    return false;
-                }
-            } else {
+        if (t.tipo != Token.Tipo.Programa) {
+
+            if (!modoPanico(Token.Tipo.Programa)) {
                 return false;
             }
+            //           return false;
+        }
+
+        getToken();
+
+        if (t.tipo != Token.Tipo.Identificador
+                && t.tipo != Token.Tipo.Inteiro
+                && t.tipo != Token.Tipo.Real
+                && t.tipo != Token.Tipo.Valor_Boleano
+                && t.tipo != Token.Tipo.Leitura
+                && t.tipo != Token.Tipo.Escrita
+                && t.tipo != Token.Tipo.Booleano) {
+            if (!modoPanico(Token.Tipo.Identificador)) {
+                return false;
+            }
+        }
+
+        getToken();
+
+        if (t.tipo != Token.Tipo.Ponto_Virgula) {
+            if (!modoPanico(Token.Tipo.Ponto_Virgula)) {
+                return false;
+            }
+        }
+
+        getToken();
+
+        if (bloco()) {
+
+            if (t.tipo != Token.Tipo.Composto_fim_codigo) {
+                if (!modoPanico(Token.Tipo.Composto_fim_codigo)) {
+                    return false;
+                }
+            }
+            return true;
         } else {
-            //modoPanico(Token.Tipo.Programa);
             return false;
         }
+
     }
 
     private boolean bloco() {
-        System.out.println("bloco");
+        //  System.out.println("bloco");
         if (parteDeclVar()) {
             if (declProc()) {
                 if (cmdComposto()) {
@@ -110,7 +126,7 @@ public class AnalisadorSintatico {
     }
 
     private boolean tipo() {
-        System.out.println("tipo");
+        //System.out.println("tipo");
         if (t.tipo == Token.Tipo.Identificador
                 || t.tipo == Token.Tipo.Inteiro
                 || t.tipo == Token.Tipo.Real
@@ -121,12 +137,14 @@ public class AnalisadorSintatico {
             getToken();
             return true;
         } else {
+            logErro(t, Token.Tipo.Identificador.name());
+
             return false;
         }
     }
 
     private boolean parteDeclVar() {
-        System.out.println("partDeclVar");
+        //System.out.println("partDeclVar");
         if (declVar()) {
             if (t.tipo == Token.Tipo.Ponto_Virgula) {
                 getToken();
@@ -136,16 +154,19 @@ public class AnalisadorSintatico {
                     return false;
                 }
             } else {
+                logErro(t, Token.Tipo.Ponto_Virgula.name());
                 return false;
             }
         } else {
             //vazio
+            removeErro();
             return true;
+
         }
     }
 
     private boolean declVar() {
-        System.out.println("declVar");
+        //System.out.println("declVar");
         if (tipo()) {
             if (listaIdent()) {
                 return true;
@@ -159,7 +180,7 @@ public class AnalisadorSintatico {
     }
 
     private boolean listaIdent() {
-        System.out.println("listaIdent");
+        //System.out.println("listaIdent");
         if (t.tipo == Token.Tipo.Identificador
                 || t.tipo == Token.Tipo.Inteiro
                 || t.tipo == Token.Tipo.Real
@@ -174,12 +195,13 @@ public class AnalisadorSintatico {
                 return false;
             }
         } else {
+            logErro(t, Token.Tipo.Identificador.name());
             return false;
         }
     }
 
     private boolean identLoop() {
-        System.out.println("identLoop");
+        //System.out.println("identLoop");
         if (t.tipo == Token.Tipo.Virgula) {
             getToken();
             if (t.tipo == Token.Tipo.Identificador
@@ -196,10 +218,12 @@ public class AnalisadorSintatico {
                     return false;
                 }
             } else {
+                logErro(t, Token.Tipo.Identificador.name());
                 return false;
             }
         } else {
             //Vazio
+            removeErro();
             return true;
         }
 
@@ -207,7 +231,7 @@ public class AnalisadorSintatico {
 
     //procedure identificador PARAM_FORM ; BLOCO ; | ε
     private boolean declProc() {
-        System.out.println("declProc");
+        //System.out.println("declProc");
         if (t.tipo == Token.Tipo.Procedure) {
             getToken();
             if (t.tipo == Token.Tipo.Identificador
@@ -226,29 +250,33 @@ public class AnalisadorSintatico {
                                 getToken();
                                 return true;
                             } else {
+                                logErro(t, Token.Tipo.Ponto_Virgula.name());
                                 return false;
                             }
                         } else {
                             return false;
                         }
                     } else {
+                        logErro(t, Token.Tipo.Ponto_Virgula.name());
                         return false;
                     }
                 } else {
                     return false;
                 }
             } else {
+                logErro(t, Token.Tipo.Identificador.name());
                 return false;
             }
         } else {
             //vazio
+            removeErro();
             return true;
         }
     }
 
     //(SEC_PARAM_FORM SEC_PARAM_FORM_LOOP ) | ε
     private boolean paramForm() {
-        System.out.println("paramForm");
+        //System.out.println("paramForm");
         if (t.tipo == Token.Tipo.Parenteses_Abre) {
             getToken();
             if (secParamForm()) {
@@ -257,6 +285,7 @@ public class AnalisadorSintatico {
                         getToken();
                         return true;
                     } else {
+                        logErro(t, Token.Tipo.Parenteses_Fecha.name());
                         return false;
                     }
                 } else {
@@ -266,13 +295,14 @@ public class AnalisadorSintatico {
                 return false;
             }
         } else {
+            logErro(t, Token.Tipo.Parenteses_Abre.name());
             return true;
         }
     }
 
     //; SEC_PARAM_FORM SEC_PARAM_FORM_LOOP | ε
     private boolean secParamFormLoop() {
-        System.out.println("secParamFormLoop");
+        // System.out.println("secParamFormLoop");
         if (t.tipo == Token.Tipo.Ponto_Virgula) {
             getToken();
             if (secParamForm()) {
@@ -286,6 +316,7 @@ public class AnalisadorSintatico {
             }
         } else {
             //vazio
+            removeErro();
             return true;
         }
 
@@ -293,7 +324,7 @@ public class AnalisadorSintatico {
 
     //var LISTA_IDENT : identificador | LISTA_IDENT : identificador
     private boolean secParamForm() {
-        System.out.println("secParamForm");
+        //System.out.println("secParamForm");
         if (t.tipo == Token.Tipo.Variavel) {
             getToken();
             if (listaIdent()) {
@@ -309,9 +340,11 @@ public class AnalisadorSintatico {
                         getToken();
                         return true;
                     } else {
+                        logErro(t, Token.Tipo.Identificador.name());
                         return false;
                     }
                 } else {
+                    logErro(t, Token.Tipo.Dois_Pontos.name());
                     return false;
                 }
             } else {
@@ -343,7 +376,7 @@ public class AnalisadorSintatico {
 
     //begin COMANDO CMD_LOOP end
     private boolean cmdComposto() {
-        System.out.println("cmdComposto");
+        //System.out.println("cmdComposto");
         if (t.tipo == Token.Tipo.Composto_inicio) {
             getToken();
             if (comando()) {
@@ -352,6 +385,9 @@ public class AnalisadorSintatico {
                         getToken();
                         return true;
                     } else {
+                        if (t.tipo != Token.Tipo.Composto_fim_codigo) {
+                            logErro(t, Token.Tipo.Composto_fim.name());
+                        }
                         return false;
                     }
                 } else {
@@ -361,13 +397,14 @@ public class AnalisadorSintatico {
                 return false;
             }
         } else {
+            logErro(t, Token.Tipo.Composto_inicio.name());
             return false;
         }
     }
 
     //; COMANDO CMD_LOOP | ε
     private boolean cmdLoop() {
-        System.out.println("cmdLoop");
+        //System.out.println("cmdLoop");
         if (t.tipo == Token.Tipo.Ponto_Virgula) {
             getToken();
             if (comando()) {
@@ -380,6 +417,8 @@ public class AnalisadorSintatico {
                 return false;
             }
         } else {
+            //vazio
+            removeErro();
             return true;
         }
 
@@ -387,7 +426,7 @@ public class AnalisadorSintatico {
 
     //START_IDENT | CMD_COMPOSTO | CMD_COND | CMD_REP
     private boolean comando() {
-        System.out.println("comando");
+        //System.out.println("comando");
         if (startIdent()) {
             return true;
         } else if (cmdComposto()) {
@@ -403,7 +442,7 @@ public class AnalisadorSintatico {
 
     //identificador OPT_IDENT
     private boolean startIdent() {
-        System.out.println("startIdent");
+        //System.out.println("startIdent");
         if (t.tipo == Token.Tipo.Identificador
                 || t.tipo == Token.Tipo.Inteiro
                 || t.tipo == Token.Tipo.Real
@@ -424,7 +463,7 @@ public class AnalisadorSintatico {
 
     //:= EXPRESSAO | OPT_LISTA_EXPR | EXPR_OPT
     private boolean optIdent() {
-        System.out.println("optIdent");
+        //System.out.println("optIdent");
         if (t.tipo == Token.Tipo.Atribuicao) {
             getToken();
             if (expressao()) {
@@ -444,7 +483,7 @@ public class AnalisadorSintatico {
 
     //( LISTA_EXPR ) | ε
     private boolean optListaExp() {
-        System.out.println("optListaExp");
+        //System.out.println("optListaExp");
         if (t.tipo == Token.Tipo.Parenteses_Abre) {
             getToken();
             if (listaExp()) {
@@ -452,19 +491,22 @@ public class AnalisadorSintatico {
                     getToken();
                     return true;
                 } else {
+                    logErro(t, Token.Tipo.Parenteses_Fecha.name());
                     return false;
                 }
             } else {
                 return false;
             }
         } else {
-            return false;
+            //vazio
+            removeErro();
+            return true;
         }
     }
 
     // CMD_COND -> if EXPRESSAO then COMANDO ELSE_CMD_OPT
     private boolean cmdCond() {
-        System.out.println("cmdCond");
+        //System.out.println("cmdCond");
         if (t.tipo == Token.Tipo.Condicional) {
             getToken();
             if (expressao()) {
@@ -481,19 +523,21 @@ public class AnalisadorSintatico {
                         return false;
                     }
                 } else {
+                    logErro(t, Token.Tipo.Condicionalt.name());
                     return false;
                 }
             } else {
                 return false;
             }
         } else {
+            logErro(t, Token.Tipo.Condicional.name());
             return false;
         }
     }
 
     // ELSE_CMD_OPT -> else COMANDO | ε
     private boolean elseCmdOpt() {
-        System.out.println("elseCmdOpt");
+        //System.out.println("elseCmdOpt");
         if (t.tipo == Token.Tipo.Condicionale) {
             getToken();
             if (comando()) {
@@ -508,7 +552,7 @@ public class AnalisadorSintatico {
 
     // CMD_REP -> while EXPRESSAO do COMANDO
     private boolean cmdRep() {
-        System.out.println("cmdRep");
+        //System.out.println("cmdRep");
         if (t.tipo == Token.Tipo.Repeticao) {
             getToken();
             if (expressao()) {
@@ -520,19 +564,21 @@ public class AnalisadorSintatico {
                         return false;
                     }
                 } else {
+                    logErro(t, Token.Tipo.Repeticaod.name());
                     return false;
                 }
             } else {
                 return false;
             }
         } else {
+            logErro(t, Token.Tipo.Repeticao.name());
             return false;
         }
     }
 
     // EXPRESSAO -> EXPR_SIMPL RELA_OPT
     private boolean expressao() {
-        System.out.println("expressao");
+        //System.out.println("expressao");
         if (expSimpl()) {
             if (relaOpt()) {
                 return true;
@@ -546,7 +592,7 @@ public class AnalisadorSintatico {
 
     // RELA_OPT -> RELACAO EXPR_SIMPL | ε
     private boolean relaOpt() {
-        System.out.println("relaOpt");
+       // System.out.println("relaOpt");
         if (relacao()) {
             if (expSimpl()) {
                 return true;
@@ -560,7 +606,7 @@ public class AnalisadorSintatico {
 
     // RELACAO -> = | <> | < | <= | >= | >
     private boolean relacao() {
-        System.out.println("relacao");
+        //System.out.println("relacao");
         if (t.tipo == Token.Tipo.Maior) {
             getToken();
             return true;
@@ -577,7 +623,7 @@ public class AnalisadorSintatico {
 
     // EXPR_SIMPL -> SINAL_OPT TERMO TERMO_LOOP
     private boolean expSimpl() {
-        System.out.println("exprSimpl");
+        //System.out.println("exprSimpl");
         if (sinalOpt()) {
             if (termo()) {
                 if (termoLoop()) {
@@ -595,7 +641,7 @@ public class AnalisadorSintatico {
 
     // SINAL_N_OPT ->  + | - 
     private boolean sinalNOpt() {
-        System.out.println("sinalNOpt");
+        //System.out.println("sinalNOpt");
         if (t.tipo == Token.Tipo.Operador_Soma) {
             getToken();
             return true;
@@ -610,11 +656,12 @@ public class AnalisadorSintatico {
 
     // SINAL_OPT ->  SINAL_N_OPT | ε
     private boolean sinalOpt() {
-        System.out.println("sinalOpt");
+        //System.out.println("sinalOpt");
         if (sinalNOpt()) {
             return true;
         } else {
             // vazio
+            removeErro();
             return true;
         }
 
@@ -622,7 +669,7 @@ public class AnalisadorSintatico {
 
     // TERMO_LOOP -> SINAL_N_OPT TERMO TERMO_LOOP | or TERMO TERMO_LOOP | ε
     private boolean termoLoop() {
-        System.out.println("termoLoop");
+        //System.out.println("termoLoop");
         if (sinalNOpt()) {
             if (termo()) {
                 if (termoLoop()) {
@@ -644,13 +691,15 @@ public class AnalisadorSintatico {
                 return false;
             }
         } else {
+            //vario
+            removeErro();
             return true;
         }
     }
 
     // TERMO -> FATOR FATOR_LOOP
     private boolean termo() {
-        System.out.println("termo");
+        //System.out.println("termo");
         if (fator()) {
             if (fatorLoop()) {
                 return true;
@@ -665,7 +714,7 @@ public class AnalisadorSintatico {
     // FATOR_LOOP -> * FATOR FATOR_LOOP | div FATOR FATOR_LOOP | 
     // and FATOR FATOR_LOOP | ε
     private boolean fatorLoop() {
-        System.out.println("fatorLoop");
+        //System.out.println("fatorLoop");
         if (t.tipo == Token.Tipo.Operador_Multiplicacao) {
             getToken();
             if (fator()) {
@@ -707,7 +756,7 @@ public class AnalisadorSintatico {
 
     // VARIAVEL -> identificador EXPR_OPT
     private boolean variavel() {
-        System.out.println("variavel");
+        //System.out.println("variavel");
         if (t.tipo == Token.Tipo.Identificador
                 || t.tipo == Token.Tipo.Inteiro
                 || t.tipo == Token.Tipo.Real
@@ -722,13 +771,14 @@ public class AnalisadorSintatico {
                 return false;
             }
         } else {
+            logErro(t, Token.Tipo.Identificador.name());
             return false;
         }
     }
 
     // FATOR -> VARIAVEL | numero | ( EXPRESSAO ) | not FATOR
     private boolean fator() {
-        System.out.println("fator");
+        //System.out.println("fator");
         if (variavel()) {
             return true;
         } else if (t.tipo == Token.Tipo.Numero_Real
@@ -761,17 +811,18 @@ public class AnalisadorSintatico {
 
     // EXPR_OPT -> EXPRESSAO | ε
     private boolean exprOpt() {
-        System.out.println("exprOpt");
+       // System.out.println("exprOpt");
         if (expressao()) {
             return true;
         } else {
+            removeErro();
             return true;
         }
     }
 
     // LISTA_EXPR -> EXPRESSAO EXPR_LOOP
     private boolean listaExp() {
-        System.out.println("listaExp");
+       // System.out.println("listaExp");
         if (expressao()) {
             if (exprLoop()) {
                 return true;
@@ -785,7 +836,7 @@ public class AnalisadorSintatico {
 
     // EXPR_LOOP -> , EXPRESSAO EXPR_LOOP | ε
     private boolean exprLoop() {
-        System.out.println("exprLoop");
+       // System.out.println("exprLoop");
         if (t.tipo == Token.Tipo.Virgula) {
             getToken();
             if (expressao()) {
@@ -800,6 +851,7 @@ public class AnalisadorSintatico {
 
         } else {
             // Vazio
+            removeErro();
             return true;
         }
 
@@ -807,15 +859,18 @@ public class AnalisadorSintatico {
 
     private void getToken() {
         t = al.getToken();
-        if (t != null) {
+        /* if (t != null) {
             System.out.println("LEXEMA: " + t.lexema);
             System.out.println("LEXEMA: " + t.tipo);
-        }
+        }*/
     }
 
-    private void modoPanico(Token.Tipo tipo) {
-        System.out.println("Entrando em modo de panico");
-        System.out.println("Era esperado um token do tipo" + tipo);
+    private boolean modoPanico(Token.Tipo tipo) {
+        if (t != null) {
+            logErro(t, tipo.name());
+        }
+        //System.out.println("Entrando em modo de panico");
+        //System.out.println("Era esperado um token do tipo" + tipo);
         while (t != null && t.tipo != tipo) {
             getToken();
             try {
@@ -823,9 +878,24 @@ public class AnalisadorSintatico {
             } catch (InterruptedException ex) {
                 Logger.getLogger(AnalisadorSintatico.class.getName()).log(Level.SEVERE, null, ex);
             }
-
+            if (t == null) {
+                return false;
+            }
         }
 
-        System.out.println("Saindo do modo de panico");
+        // System.out.println("Saindo do modo de panico");
+        return true;
+    }
+
+    private void logErro(Token encontrado, String esperado) {
+        erro.add("ERRO:" + encontrado.linha + ":" + encontrado.coluna_ini + ":" + encontrado.coluna_fim + " " + encontrado.lexema + " inesperado, era esperado um '" + esperado + "'");
+    }
+
+    private void removeErro() {
+
+        if (erro.size() >= 1) {
+         //   System.out.println("REMOVE ERRO");
+            erro.remove(erro.size() - 1);
+        }
     }
 }
