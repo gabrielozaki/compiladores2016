@@ -20,6 +20,42 @@ public class AnalisadorSintatico {
     private Token t;
     private List<String> erro = new ArrayList<String>();
 
+    private List<Token.Tipo> followProgram = new ArrayList<Token.Tipo>();
+    private List<Token.Tipo> followBloco = new ArrayList<Token.Tipo>();
+    private List<Token.Tipo> followTipo = new ArrayList<Token.Tipo>();
+    private List<Token.Tipo> followParteDeclVar = new ArrayList<Token.Tipo>();
+    private List<Token.Tipo> followDeclVarLoop = new ArrayList<Token.Tipo>();
+    private List<Token.Tipo> followDeclVar = new ArrayList<Token.Tipo>();
+    private List<Token.Tipo> followListaIdent = new ArrayList<Token.Tipo>();
+    private List<Token.Tipo> followIdentLoop = new ArrayList<Token.Tipo>();
+    private List<Token.Tipo> followDeclProc = new ArrayList<Token.Tipo>();
+    private List<Token.Tipo> followParamForm = new ArrayList<Token.Tipo>();
+    private List<Token.Tipo> followSecParamFormLoop = new ArrayList<Token.Tipo>();
+    private List<Token.Tipo> followSecParamForm = new ArrayList<Token.Tipo>();
+    private List<Token.Tipo> followCmdComposto = new ArrayList<Token.Tipo>();
+    private List<Token.Tipo> followCmdLoop = new ArrayList<Token.Tipo>();
+    private List<Token.Tipo> followComando = new ArrayList<Token.Tipo>();
+    private List<Token.Tipo> followStartIdent = new ArrayList<Token.Tipo>();
+    private List<Token.Tipo> followOptIdent = new ArrayList<Token.Tipo>();
+    private List<Token.Tipo> followOptListaExpr = new ArrayList<Token.Tipo>();
+    private List<Token.Tipo> followCmdCond = new ArrayList<Token.Tipo>();
+    private List<Token.Tipo> followElseCmdOpt = new ArrayList<Token.Tipo>();
+    private List<Token.Tipo> followCmdRep = new ArrayList<Token.Tipo>();
+    private List<Token.Tipo> followExpressao = new ArrayList<Token.Tipo>();
+    private List<Token.Tipo> followRelaOpt = new ArrayList<Token.Tipo>();
+    private List<Token.Tipo> followRelacao = new ArrayList<Token.Tipo>();
+    private List<Token.Tipo> followExpr_Simpl = new ArrayList<Token.Tipo>();
+    private List<Token.Tipo> followSinalNOpt = new ArrayList<Token.Tipo>();
+    private List<Token.Tipo> followSinalOpt = new ArrayList<Token.Tipo>();
+    private List<Token.Tipo> followTermoLoop = new ArrayList<Token.Tipo>();
+    private List<Token.Tipo> followTermo = new ArrayList<Token.Tipo>();
+    private List<Token.Tipo> followFatorLoop = new ArrayList<Token.Tipo>();
+    private List<Token.Tipo> followVariavel = new ArrayList<Token.Tipo>();
+    private List<Token.Tipo> followFator = new ArrayList<Token.Tipo>();
+    private List<Token.Tipo> followExprOpt = new ArrayList<Token.Tipo>();
+    private List<Token.Tipo> followListaExpr = new ArrayList<Token.Tipo>();
+    private List<Token.Tipo> followExprLoop = new ArrayList<Token.Tipo>();
+
     public static void AnalisadorSintatico() {
         //so cria o construtor
     }
@@ -53,12 +89,120 @@ public class AnalisadorSintatico {
 
     }
 
+    private void iniciaFollows() {
+        //programa
+        followProgram.add(Token.Tipo.Programa);
+
+        //Bloco
+        followBloco.add(Token.Tipo.Composto_fim_codigo);
+        followBloco.add(Token.Tipo.Ponto_Virgula);
+
+        //Tipo
+        followTipo.add(Token.Tipo.Identificador);
+
+        //ParteDeclVar
+        followParteDeclVar.add(Token.Tipo.Procedure);
+        followParteDeclVar.add(Token.Tipo.Composto_inicio);
+
+        //DeclVarLoop
+        followDeclVarLoop.add(Token.Tipo.Ponto_Virgula);
+
+        //DeclVar
+        followDeclVar.add(Token.Tipo.Ponto_Virgula);
+
+        //ListaIdent
+        followListaIdent.add(Token.Tipo.Ponto_Virgula);
+        followListaIdent.add(Token.Tipo.Dois_Pontos);
+
+        //IdentLoop
+        followIdentLoop.add(Token.Tipo.Ponto_Virgula);
+        followIdentLoop.add(Token.Tipo.Dois_Pontos);
+
+        //DeclProc
+        followDeclProc.add(Token.Tipo.Composto_inicio);
+
+        //ParamForm
+        followParamForm.add(Token.Tipo.Ponto_Virgula);
+
+        //SecParamFormLoop
+        followSecParamFormLoop.add(Token.Tipo.Parenteses_Fecha);
+
+        //SecParamForm
+        followSecParamForm.add(Token.Tipo.Ponto_Virgula);
+        followSecParamForm.add(Token.Tipo.Parenteses_Fecha);
+
+        //CmdComposto
+        followCmdComposto.add(Token.Tipo.Ponto_Virgula);
+        followCmdComposto.add(Token.Tipo.Composto_fim);
+        followCmdComposto.add(Token.Tipo.Condicional);
+
+        followCmdLoop.add(Token.Tipo.Composto_fim);
+
+        followComando.add(Token.Tipo.Ponto_Virgula);
+        followComando.add(Token.Tipo.Composto_fim);
+        followComando.add(Token.Tipo.Condicional);
+
+        //StartIdent
+        followStartIdent.add(Token.Tipo.Ponto_Virgula);
+        followStartIdent.add(Token.Tipo.Composto_fim);
+        followStartIdent.add(Token.Tipo.Condicional);
+
+        followOptIdent.add(Token.Tipo.Ponto_Virgula);
+        followOptIdent.add(Token.Tipo.Composto_fim);
+        followOptIdent.add(Token.Tipo.Condicional);
+
+        followOptListaExpr.add(Token.Tipo.Ponto_Virgula);
+        followOptListaExpr.add(Token.Tipo.Composto_fim);
+        followOptListaExpr.add(Token.Tipo.Condicional);
+
+        followCmdCond.add(Token.Tipo.Ponto_Virgula);
+        followCmdCond.add(Token.Tipo.Composto_fim);
+        followCmdCond.add(Token.Tipo.Condicional);
+
+        followElseCmdOpt.add(Token.Tipo.Ponto_Virgula);
+        followElseCmdOpt.add(Token.Tipo.Composto_fim);
+        followElseCmdOpt.add(Token.Tipo.Condicional);
+
+        followCmdRep.add(Token.Tipo.Ponto_Virgula);
+        followCmdRep.add(Token.Tipo.Composto_fim);
+        followCmdRep.add(Token.Tipo.Condicional);
+
+        followExpressao.add(Token.Tipo.Ponto_Virgula);
+        followExpressao.add(Token.Tipo.Composto_fim);
+        followExpressao.add(Token.Tipo.Condicional);
+        followExpressao.add(Token.Tipo.Operador_Multiplicacao);
+        followExpressao.add(Token.Tipo.Operador_Divisao);
+        followExpressao.add(Token.Tipo.And);
+        followExpressao.add(Token.Tipo.Igual);
+        followExpressao.add(Token.Tipo.Maior);
+        followExpressao.add(Token.Tipo.Menor);
+        followExpressao.add(Token.Tipo.Virgula);
+        followExpressao.add(Token.Tipo.Parenteses_Fecha);
+        followExpressao.add(Token.Tipo.Condicionalt);
+        followExpressao.add(Token.Tipo.Repeticaod);
+
+        followRelaOpt.add(Token.Tipo.Ponto_Virgula);
+        followRelaOpt.add(Token.Tipo.Composto_fim);
+        followRelaOpt.add(Token.Tipo.Condicional);
+        followRelaOpt.add(Token.Tipo.Operador_Multiplicacao);
+        followRelaOpt.add(Token.Tipo.Operador_Divisao);
+        followRelaOpt.add(Token.Tipo.And);
+        followRelaOpt.add(Token.Tipo.Igual);
+        followRelaOpt.add(Token.Tipo.Maior);
+        followRelaOpt.add(Token.Tipo.Menor);
+        followRelaOpt.add(Token.Tipo.Virgula);
+        followRelaOpt.add(Token.Tipo.Parenteses_Fecha);
+        followRelaOpt.add(Token.Tipo.Condicionalt);
+        followRelaOpt.add(Token.Tipo.Repeticaod);
+
+    }
+
     private boolean program() {
         //  System.out.println("program");
 
         if (t.tipo != Token.Tipo.Programa) {
 
-            if (!modoPanico(Token.Tipo.Programa)) {
+            if (!modoPanico(Token.Tipo.Programa,followProgram)) {
                 return false;
             }
             //           return false;
@@ -73,7 +217,7 @@ public class AnalisadorSintatico {
                 && t.tipo != Token.Tipo.Leitura
                 && t.tipo != Token.Tipo.Escrita
                 && t.tipo != Token.Tipo.Booleano) {
-            if (!modoPanico(Token.Tipo.Identificador)) {
+            if (!modoPanico(Token.Tipo.Identificador,followIdentLoop)) {
                 return false;
             }
         }
@@ -81,7 +225,7 @@ public class AnalisadorSintatico {
         getToken();
 
         if (t.tipo != Token.Tipo.Ponto_Virgula) {
-            if (!modoPanico(Token.Tipo.Ponto_Virgula)) {
+            if (!modoPanico(Token.Tipo.Ponto_Virgula,followPontoVirgula)) {
                 return false;
             }
         }
@@ -592,7 +736,7 @@ public class AnalisadorSintatico {
 
     // RELA_OPT -> RELACAO EXPR_SIMPL | ε
     private boolean relaOpt() {
-       // System.out.println("relaOpt");
+        // System.out.println("relaOpt");
         if (relacao()) {
             if (expSimpl()) {
                 return true;
@@ -811,7 +955,7 @@ public class AnalisadorSintatico {
 
     // EXPR_OPT -> EXPRESSAO | ε
     private boolean exprOpt() {
-       // System.out.println("exprOpt");
+        // System.out.println("exprOpt");
         if (expressao()) {
             return true;
         } else {
@@ -822,7 +966,7 @@ public class AnalisadorSintatico {
 
     // LISTA_EXPR -> EXPRESSAO EXPR_LOOP
     private boolean listaExp() {
-       // System.out.println("listaExp");
+        // System.out.println("listaExp");
         if (expressao()) {
             if (exprLoop()) {
                 return true;
@@ -836,7 +980,7 @@ public class AnalisadorSintatico {
 
     // EXPR_LOOP -> , EXPRESSAO EXPR_LOOP | ε
     private boolean exprLoop() {
-       // System.out.println("exprLoop");
+        // System.out.println("exprLoop");
         if (t.tipo == Token.Tipo.Virgula) {
             getToken();
             if (expressao()) {
@@ -865,18 +1009,20 @@ public class AnalisadorSintatico {
         }*/
     }
 
-    private boolean modoPanico(Token.Tipo tipo) {
+    private boolean modoPanico(Token.Tipo esperado, List<Token.Tipo> follow) {
         if (t != null) {
-            logErro(t, tipo.name());
+            logErro(t, esperado.name());
+        } else {
+            return false;
         }
         //System.out.println("Entrando em modo de panico");
         //System.out.println("Era esperado um token do tipo" + tipo);
-        while (t != null && t.tipo != tipo) {
+        while (true) {
             getToken();
-            try {
-                Thread.sleep(10);
-            } catch (InterruptedException ex) {
-                Logger.getLogger(AnalisadorSintatico.class.getName()).log(Level.SEVERE, null, ex);
+            for (Token.Tipo f : follow) {
+                if (t.tipo == f) {
+                    return true;
+                }
             }
             if (t == null) {
                 return false;
@@ -884,7 +1030,6 @@ public class AnalisadorSintatico {
         }
 
         // System.out.println("Saindo do modo de panico");
-        return true;
     }
 
     private void logErro(Token encontrado, String esperado) {
@@ -894,7 +1039,7 @@ public class AnalisadorSintatico {
     private void removeErro() {
 
         if (erro.size() >= 1) {
-         //   System.out.println("REMOVE ERRO");
+            //   System.out.println("REMOVE ERRO");
             erro.remove(erro.size() - 1);
         }
     }
