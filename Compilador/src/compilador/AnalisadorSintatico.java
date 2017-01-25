@@ -168,44 +168,216 @@ public class AnalisadorSintatico {
     	
     }
     
+    //procedure identificador PARAM_FORM ; BLOCO ; | ε
     private boolean declProc(){
-    	return true;
+    	if(t.tipo == Token.Tipo.Procedure){
+    		getToken();
+    		if(t.tipo == Token.Tipo.Identificador){
+    			getToken();
+    			if(paramForm()){
+    				if(t.tipo == Token.Tipo.Ponto_Virgula){
+    					getToken();
+    					if(bloco()){
+    						if(t.tipo == Token.Tipo.Ponto_Virgula){
+    							getToken();
+    							return true;
+    						}else{
+    							return false;
+    						}
+    					}else{
+    						return false;
+    					}
+    				}else{
+    					return false;
+    				}
+    			}else{
+    				return false;
+    			}
+    		}else{
+    			return false;
+    		}
+    	}else{
+    		//vazio
+    		return true;
+    	}
     }
     
+    //(SEC_PARAM_FORM SEC_PARAM_FORM_LOOP ) | ε
     private boolean paramForm(){
-    	return true;
+    	if(secParamForm()){
+    		if(secParamFormLoop()){
+    			return true;
+    		}else{
+    			return false;
+    		}
+    	}else{
+    		return true;
+    	}
     }
     
+    //; SEC_PARAM_FORM SEC_PARAM_FORM_LOOP | ε
     private boolean secParamFormLoop(){
-    	return true;
+    	if(t.tipo == Token.Tipo.Ponto_Virgula){
+    		getToken();
+    		if(secParamForm()){
+    			if(secParamFormLoop()){
+    				return true;
+    			}else{
+    				return false;
+    			}
+    		}else{
+    			return false;
+    		}
+    	}else{
+    		//vazio
+    		return true;
+    	}
+    	
     }
     
-    private boolean SecParamForm(){
-    	return true;
+    //var LISTA_IDENT : identificador | LISTA_IDENT : identificador
+    private boolean secParamForm(){
+    	if(t.tipo == Token.Tipo.Variavel){
+    		getToken();
+    		if(listaIdent()){
+    			if(t.tipo == Token.Tipo.Dois_Pontos){
+    				getToken();
+    				if(t.tipo == Token.Tipo.Identificador){
+    					getToken();
+    					return true;
+    				}else{
+    					return false;
+    				}
+    			}else{
+    				return false;
+    			}
+    		}else{
+    			return false;
+    		}
+    	}else if(listaIdent()){
+    		if(t.tipo == Token.Tipo.Dois_Pontos){
+    			getToken();
+    			if(t.tipo == Token.Tipo.Identificador){
+    				getToken();
+    				return true;
+    			}else{
+    				return false;
+    			}
+    		}else{
+    			return false;
+    		}
+    	}else{
+    		return false;
+    	}
+    	
     }
     
+    //begin COMANDO CMD_LOOP end
     private boolean cmdComposto(){
-    	return true;
+    	if(t.tipo == Token.Tipo.Composto_inicio){
+    		getToken();
+    		if(comando()){
+    			if(cmdLoop()){
+    				if(t.tipo == Token.Tipo.Composto_fim){
+    					getToken();
+    					return true;
+    				}else{
+    					return false;
+    				}
+    			}else{
+    				return false;
+    			}
+    		}else{
+    			return false;
+    		}
+    	}else{
+    		return false;
+    	}
     }
     
+    //; COMANDO CMD_LOOP | ε
     private boolean cmdLoop(){
-    	return true;
+    	if(t.tipo == Token.Tipo.Ponto_Virgula){
+    		getToken();
+    		if(comando()){
+    			if(cmdLoop()){
+    				return true;
+    			}else{
+    				return false;
+    			}
+    		}else{
+    			return false;
+    		}
+    	}else{
+    		return true;
+    	}
+    	
     }
     
+    //START_IDENT | CMD_COMPOSTO | CMD_COND | CMD_REP
     private boolean comando(){
-    	return true;
+    	if(startIdent()){
+    		return true;
+    	}else if(cmdComposto()){
+    		return true;
+    	}else if(cmdCond()){
+    		return true;
+    	}else if(cmdRep()){
+    		return true;
+    	}else{
+    		return false;
+    	}
     }
     
+    //identificador OPT_IDENT
     private boolean startIdent(){
-    	return true;
+    	if(t.tipo == Token.Tipo.Identificador){
+    		getToken();
+    		if(optIdent()){
+    			return true;
+    		}else{
+    			return false;
+    		}
+    	}else{
+    		return false;
+    	}
     }
     
+    //:= EXPRESSAO | OPT_LISTA_EXPR | EXPR_OPT
     private boolean optIdent(){
-    	return true;
+    	if(t.tipo == Token.Tipo.Atribuicao){
+    		getToken();
+    		if(expressao()){
+    			return true;
+    		}else{
+    			return false;
+    		}
+    	}else if(optListaExp()){
+    		return true;
+    	}else if(exprOpt()){
+    		return true;
+    	}else{
+    		return false;
+    	}
+    	
     }
     
+    //( LISTA_EXPR ) | ε
     private boolean optListaExp(){
-    	return true;
+    	if(t.tipo == Token.Tipo.Parenteses_Abre){
+    		getToken();
+    		if(listaExp()){
+    			if(t.tipo == Token.Tipo.Parenteses_Fecha){
+    				return true;
+    			}else{
+    				return false;
+    			}
+    		}else{
+    			return false;
+    		}
+    	}else{
+    		return false;
+    	}
     }
     
     private boolean cmdCond(){
