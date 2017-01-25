@@ -30,7 +30,7 @@ public class AnalisadorSintatico {
 
     public void executaAnalise() {
         boolean status;
-        Token t = al.getToken();;
+        getToken();
         /*while (t != null) {
             System.out.println(t.lexema);
             t = al.getToken();
@@ -44,6 +44,7 @@ public class AnalisadorSintatico {
     }
     
     private boolean program(){
+    	System.out.println("program");
     	boolean bloco;
     	if(t.tipo == Token.Tipo.Programa){
     		getToken();
@@ -75,6 +76,7 @@ public class AnalisadorSintatico {
     }
     
     private boolean bloco(){
+    	System.out.println("bloco");
     	if(parteDeclVar()){
     		if(declProc()){
     			if(cmdComposto()){
@@ -92,6 +94,7 @@ public class AnalisadorSintatico {
     }
     
     private boolean tipo(){
+    	System.out.println("tipo");
     	if(t.tipo == Token.Tipo.Identificador){
     		getToken();
     		return true;
@@ -101,6 +104,7 @@ public class AnalisadorSintatico {
     }
 
     private boolean parteDeclVar(){
+    	System.out.println("partDeclVar");
     	if(declVar()){
     		if(declVarLoop()){
     			if(t.tipo == Token.Tipo.Ponto_Virgula){
@@ -118,8 +122,22 @@ public class AnalisadorSintatico {
     	}
     }
     
+    //
     private boolean declVarLoop(){
-    	return true;
+    	if(t.tipo == Token.Tipo.Ponto_Virgula){
+    		getToken();
+    		if(declVar()){
+    			if(declVarLoop()){
+    				return true;
+    			}else{
+    				return false;
+    			}
+    		}else{
+    			return false;
+    		}
+    	}else{
+    		return true;
+    	}
     }
     
     private boolean declVar(){
@@ -688,5 +706,7 @@ public class AnalisadorSintatico {
     
     private void getToken(){
     	t = al.getToken();
+        System.out.println("PRINT TOKEN");
+    	System.out.println(t.lexema);
     }
 }
