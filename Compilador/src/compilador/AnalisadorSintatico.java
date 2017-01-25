@@ -44,7 +44,7 @@ public class AnalisadorSintatico {
     private List<Token.Tipo> followExpressao = new ArrayList<Token.Tipo>();
     private List<Token.Tipo> followRelaOpt = new ArrayList<Token.Tipo>();
     private List<Token.Tipo> followRelacao = new ArrayList<Token.Tipo>();
-    private List<Token.Tipo> followExpr_Simpl = new ArrayList<Token.Tipo>();
+    private List<Token.Tipo> followExprSimpl = new ArrayList<Token.Tipo>();
     private List<Token.Tipo> followSinalNOpt = new ArrayList<Token.Tipo>();
     private List<Token.Tipo> followSinalOpt = new ArrayList<Token.Tipo>();
     private List<Token.Tipo> followTermoLoop = new ArrayList<Token.Tipo>();
@@ -195,6 +195,127 @@ public class AnalisadorSintatico {
         followRelaOpt.add(Token.Tipo.Condicionalt);
         followRelaOpt.add(Token.Tipo.Repeticaod);
 
+        followRelacao.add(Token.Tipo.Operador_Soma);
+        followRelacao.add(Token.Tipo.Operador_Subtracao);
+        followRelacao.add(Token.Tipo.Identificador);
+        followRelacao.add(Token.Tipo.Numero_Inteiro);
+        followRelacao.add(Token.Tipo.Numero_Real);
+        followRelacao.add(Token.Tipo.Parenteses_Abre);
+        followRelacao.add(Token.Tipo.Not);
+
+        followExprSimpl.add(Token.Tipo.Ponto_Virgula);
+        followExprSimpl.add(Token.Tipo.Composto_fim);
+        followExprSimpl.add(Token.Tipo.Condicional);
+        followExprSimpl.add(Token.Tipo.Operador_Multiplicacao);
+        followExprSimpl.add(Token.Tipo.Operador_Divisao);
+        followExprSimpl.add(Token.Tipo.And);
+        followExprSimpl.add(Token.Tipo.Igual);
+        followExprSimpl.add(Token.Tipo.Maior);
+        followExprSimpl.add(Token.Tipo.Menor);
+        followExprSimpl.add(Token.Tipo.Virgula);
+        followExprSimpl.add(Token.Tipo.Parenteses_Fecha);
+        followExprSimpl.add(Token.Tipo.Condicionalt);
+        followExprSimpl.add(Token.Tipo.Repeticaod);
+
+        followSinalNOpt.add(Token.Tipo.Identificador);
+        followSinalNOpt.add(Token.Tipo.Numero_Inteiro);
+        followSinalNOpt.add(Token.Tipo.Numero_Real);
+        followSinalNOpt.add(Token.Tipo.Parenteses_Abre);
+        followSinalNOpt.add(Token.Tipo.Not);
+
+        followSinalOpt.add(Token.Tipo.Identificador);
+        followSinalOpt.add(Token.Tipo.Numero_Inteiro);
+        followSinalOpt.add(Token.Tipo.Numero_Real);
+        followSinalOpt.add(Token.Tipo.Parenteses_Abre);
+        followSinalOpt.add(Token.Tipo.Not);
+
+        followTermoLoop.add(Token.Tipo.Ponto_Virgula);
+        followTermoLoop.add(Token.Tipo.Composto_fim);
+        followTermoLoop.add(Token.Tipo.Condicional);
+        followTermoLoop.add(Token.Tipo.Operador_Multiplicacao);
+        followTermoLoop.add(Token.Tipo.Operador_Divisao);
+        followTermoLoop.add(Token.Tipo.And);
+        followTermoLoop.add(Token.Tipo.Igual);
+        followTermoLoop.add(Token.Tipo.Maior);
+        followTermoLoop.add(Token.Tipo.Menor);
+        followTermoLoop.add(Token.Tipo.Virgula);
+        followTermoLoop.add(Token.Tipo.Parenteses_Fecha);
+        followTermoLoop.add(Token.Tipo.Condicionalt);
+        followTermoLoop.add(Token.Tipo.Repeticaod);
+
+        followTermo.add(Token.Tipo.Ponto_Virgula);
+        followTermo.add(Token.Tipo.Composto_fim);
+        followTermo.add(Token.Tipo.Condicional);
+        followTermo.add(Token.Tipo.Operador_Multiplicacao);
+        followTermo.add(Token.Tipo.Operador_Divisao);
+        followTermo.add(Token.Tipo.And);
+        followTermo.add(Token.Tipo.Igual);
+        followTermo.add(Token.Tipo.Maior);
+        followTermo.add(Token.Tipo.Menor);
+        followTermo.add(Token.Tipo.Virgula);
+        followTermo.add(Token.Tipo.Parenteses_Fecha);
+        followTermo.add(Token.Tipo.Condicionalt);
+        followTermo.add(Token.Tipo.Repeticaod);
+
+        followFatorLoop.add(Token.Tipo.Ponto_Virgula);
+        followFatorLoop.add(Token.Tipo.Composto_fim);
+        followFatorLoop.add(Token.Tipo.Condicional);
+        followFatorLoop.add(Token.Tipo.Operador_Multiplicacao);
+        followFatorLoop.add(Token.Tipo.Operador_Divisao);
+        followFatorLoop.add(Token.Tipo.And);
+        followFatorLoop.add(Token.Tipo.Igual);
+        followFatorLoop.add(Token.Tipo.Maior);
+        followFatorLoop.add(Token.Tipo.Menor);
+        followFatorLoop.add(Token.Tipo.Virgula);
+        followFatorLoop.add(Token.Tipo.Parenteses_Fecha);
+        followFatorLoop.add(Token.Tipo.Condicionalt);
+        followFatorLoop.add(Token.Tipo.Repeticaod);
+
+        followVariavel.add(Token.Tipo.Ponto_Virgula);
+        followVariavel.add(Token.Tipo.Composto_fim);
+        followVariavel.add(Token.Tipo.Condicional);
+        followVariavel.add(Token.Tipo.Operador_Multiplicacao);
+        followVariavel.add(Token.Tipo.Operador_Divisao);
+        followVariavel.add(Token.Tipo.And);
+        followVariavel.add(Token.Tipo.Igual);
+        followVariavel.add(Token.Tipo.Maior);
+        followVariavel.add(Token.Tipo.Menor);
+        followVariavel.add(Token.Tipo.Virgula);
+        followVariavel.add(Token.Tipo.Parenteses_Fecha);
+        followVariavel.add(Token.Tipo.Condicionalt);
+        followVariavel.add(Token.Tipo.Repeticaod);
+
+        followFator.add(Token.Tipo.Ponto_Virgula);
+        followFator.add(Token.Tipo.Composto_fim);
+        followFator.add(Token.Tipo.Condicional);
+        followFator.add(Token.Tipo.Operador_Multiplicacao);
+        followFator.add(Token.Tipo.Operador_Divisao);
+        followFator.add(Token.Tipo.And);
+        followFator.add(Token.Tipo.Igual);
+        followFator.add(Token.Tipo.Maior);
+        followFator.add(Token.Tipo.Menor);
+        followFator.add(Token.Tipo.Virgula);
+        followFator.add(Token.Tipo.Parenteses_Fecha);
+        followFator.add(Token.Tipo.Condicionalt);
+        followFator.add(Token.Tipo.Repeticaod);
+        
+        followExprOpt.add(Token.Tipo.Ponto_Virgula);
+        followExprOpt.add(Token.Tipo.Composto_fim);
+        followExprOpt.add(Token.Tipo.Condicional);
+        followExprOpt.add(Token.Tipo.Operador_Multiplicacao);
+        followExprOpt.add(Token.Tipo.Operador_Divisao);
+        followExprOpt.add(Token.Tipo.And);
+        followExprOpt.add(Token.Tipo.Igual);
+        followExprOpt.add(Token.Tipo.Maior);
+        followExprOpt.add(Token.Tipo.Menor);
+        followExprOpt.add(Token.Tipo.Virgula);
+        followExprOpt.add(Token.Tipo.Parenteses_Fecha);
+        followExprOpt.add(Token.Tipo.Condicionalt);
+        followExprOpt.add(Token.Tipo.Repeticaod);
+        
+        followListaExpr.add(Token.Tipo.Parenteses_Fecha);
+        
+        followExprLoop.add(Token.Tipo.Parenteses_Fecha);
     }
 
     private boolean program() {
@@ -202,7 +323,7 @@ public class AnalisadorSintatico {
 
         if (t.tipo != Token.Tipo.Programa) {
 
-            if (!modoPanico(Token.Tipo.Programa,followProgram)) {
+            if (!modoPanico(Token.Tipo.Programa, followProgram)) {
                 return false;
             }
             //           return false;
@@ -217,7 +338,7 @@ public class AnalisadorSintatico {
                 && t.tipo != Token.Tipo.Leitura
                 && t.tipo != Token.Tipo.Escrita
                 && t.tipo != Token.Tipo.Booleano) {
-            if (!modoPanico(Token.Tipo.Identificador,followIdentLoop)) {
+            if (!modoPanico(Token.Tipo.Identificador, followIdentLoop)) {
                 return false;
             }
         }
@@ -225,7 +346,7 @@ public class AnalisadorSintatico {
         getToken();
 
         if (t.tipo != Token.Tipo.Ponto_Virgula) {
-            if (!modoPanico(Token.Tipo.Ponto_Virgula,followPontoVirgula)) {
+            if (!modoPanico(Token.Tipo.Ponto_Virgula, followPontoVirgula)) {
                 return false;
             }
         }
