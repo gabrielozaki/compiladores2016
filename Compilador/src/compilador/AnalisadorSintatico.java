@@ -14,6 +14,7 @@ import java.util.List;
 public class AnalisadorSintatico {
 
     private AnalisadorLexico al = new AnalisadorLexico();
+    private Token t;
 
     public static void AnalisadorSintatico() {
         //so cria o construtor
@@ -34,7 +35,7 @@ public class AnalisadorSintatico {
             System.out.println(t.lexema);
             t = al.getToken();
         }*/
-        status = program(t);
+        status = program();
         
         if(status){
             System.out.println("Sucesso");
@@ -42,145 +43,477 @@ public class AnalisadorSintatico {
         
     }
     
-    private boolean program(Token t){
-    	return true;
+    private boolean program(){
+    	boolean bloco;
+    	if(t.tipo == Token.Tipo.Programa){
+    		getToken();
+    		if(t.tipo == Token.Tipo.Identificador){
+    			getToken();
+    			if(t.tipo == Token.Tipo.Ponto_Virgula){
+    				getToken();
+    				if(bloco()){
+    					getToken();
+    					if(t.tipo == Token.Tipo.Composto_fim_codigo){
+    						return true;
+    					}else{
+    						return false;
+    					}
+    				}else{
+    					return false;
+    				}
+    					
+    			}else{
+    				return false;
+    			}
+    		}else{
+    			return false;
+    		}
+    	}
+    	else{
+    		return false;
+    	}
     }
     
-    private boolean bloco(Token t){
-    	return true;
+    private boolean bloco(){
+    	if(parteDeclVar()){
+    		if(declProc()){
+    			if(cmdComposto()){
+    				return true;
+    			}else{
+    				return false;
+    			}
+    		}else{
+    			return false;
+    		}
+    	}else{
+    		return false;
+    	}
+    	
     }
     
-    private boolean tipo(Token t){
-    	return true;
+    private boolean tipo(){
+    	if(t.tipo == Token.Tipo.Identificador){
+    		getToken();
+    		return true;
+    	}else{
+    		return false;
+    	}
     }
 
-    private boolean parteDeclVar(Token t){
+    private boolean parteDeclVar(){
+    	if(declVar()){
+    		if(declVarLoop()){
+    			if(t.tipo == Token.Tipo.Ponto_Virgula){
+    				getToken();
+    				return true;
+    			}else{
+    				return false;
+    			}
+    		}else{
+    			return false;
+    		}
+    	}else{
+    		//vazio
+    		return true;
+    	}
+    }
+    
+    private boolean declVarLoop(){
     	return true;
     }
     
-    private boolean declVarLoop(Token t){
+    private boolean declVar(){
+    	if(tipo()){
+    		if(listaIdent()){
+    			return true;
+    		}else{
+    			return false;
+    		}
+    	}else{
+    		return false;
+    	}
+    	
+    }
+    
+    private boolean listaIdent(){
+    	if(t.tipo == Token.Tipo.Identificador){
+    		getToken();
+    		if(identLoop()){
+    			return true;
+    		}else{
+    			return false;
+    		}
+    	}else{
+    		return false;
+    	}
+    }
+    
+    private boolean identLoop(){
+    	if(t.tipo == Token.Tipo.Virgula){
+    		getToken();
+    		if(t.tipo == Token.Tipo.Identificador){
+    			getToken();
+    			if(identLoop()){
+    				return true;
+    			}else{
+    				return false;
+    			}
+    		}else{
+    			return false;
+    		}
+    	}else{
+    		//Vazio
+    		return true;
+    	}
+    	
+    }
+    
+    private boolean declProc(){
     	return true;
     }
     
-    private boolean declVar(Token t){
+    private boolean paramForm(){
     	return true;
     }
     
-    private boolean listaIdent(Token t){
+    private boolean secParamFormLoop(){
     	return true;
     }
     
-    private boolean identLoop(Token t){
+    private boolean SecParamForm(){
     	return true;
     }
     
-    private boolean declProc(Token t){
+    private boolean cmdComposto(){
     	return true;
     }
     
-    private boolean paramForm(Token t){
+    private boolean cmdLoop(){
     	return true;
     }
     
-    private boolean secParamFormLoop(Token t){
+    private boolean comando(){
     	return true;
     }
     
-    private boolean SecParamForm(Token t){
+    private boolean startIdent(){
     	return true;
     }
     
-    private boolean CmdComposto(Token t){
+    private boolean optIdent(){
     	return true;
     }
     
-    private boolean cmdLoop(Token t){
+    private boolean optListaExp(){
     	return true;
     }
-    
-    private boolean comando(Token t){
-    	return true;
+    // CMD_COND -> if EXPRESSAO then COMANDO ELSE_CMD_OPT
+    private boolean cmdCond(){
+    	if (t.tipo == Token.Tipo.Condicional){
+            getToken();
+            if (expressao()){
+                if (t.tipo == Token.Tipo.Condicionalt){
+                    getToken();
+                    if (comando()){
+                        if (elseCmdOpt()){
+                            return true;
+                        }else{
+                            return false;
+                        }
+                    }else{
+                        return false;
+                    }
+                }else{
+                    return false;
+                }
+            }else{
+                return false;
+            }
+        }else{
+            return false;
+        }
+    }
+    // ELSE_CMD_OPT -> else COMANDO | ε
+    private boolean elseCmdOpt(){
+    	if (t.tipo == Token.Tipo.Condicionale){
+            getToken();
+            if (comando()){
+                return true;
+            }else{
+                return false;
+            }
+        }else{
+            return true;
+        }
+    }
+    // CMD_REP -> while EXPRESSAO do COMANDO
+    private boolean cmdRep(){
+    	if (t.tipo == Token.Tipo.Repeticao){
+            getToken();
+            if (expressao()){
+                if (t.tipo == Token.Tipo.Repeticaod){
+                    getToken();
+                    if (comando()){
+                        return true;
+                    }else{
+                        return false;
+                    }
+                }else{
+                    return false;
+                }
+            }else{
+                return false;
+            }
+        }else{
+            return false;
+        }
+    }
+    // EXPRESSAO -> EXPR_SIMPL RELA_OPT
+    private boolean expressao(){
+    	if (expSimpl()){
+            if (relaOpt()){
+                return true;
+            }else{
+                return false;
+            }
+        }else{
+            return false;
+        }
+    }
+    // RELA_OPT -> RELACAO EXPR_SIMPL | ε
+    private boolean relaOpt(){
+    	if (relacao()){
+            if (expSimpl()){
+                return true;
+            }else{
+                return false;
+            }
+        }else{
+            return true;
+        }
+    }
+    // RELACAO -> = | <> | < | <= | >= | >
+    private boolean relacao(){
+    	if (t.tipo == Token.Tipo.Maior){
+            getToken();
+            return true;
+        }else if (t.tipo == Token.Tipo.Menor){
+            getToken();
+            return true;
+        }else if (t.tipo == Token.Tipo.Igual){
+            getToken();
+            return true;
+        }else{
+            return false;
+        }
+    }
+    // EXPR_SIMPL -> SINAL_OPT TERMO TERMO_LOOP
+    private boolean expSimpl(){
+    	if (sinalOpt()){
+            if (termo()){
+                if (termoLoop()){
+                    return true;
+                }else{
+                    return false;
+                }
+            }else{
+                return false;
+            }
+        }else{
+            return false;
+        }
+    }
+    // SINAL_N_OPT ->  + | - 
+    private boolean sinalNOpt(){
+        if (t.tipo == Token.Tipo.Operador_Soma){
+            getToken();
+            return true;
+        }else if (t.tipo == Token.Tipo.Operador_Subtracao){
+            getToken();
+            return true;
+        }else{
+            return false;
+        }
+    	
+    }
+
+    // SINAL_OPT ->  SINAL_N_OPT | ε
+    private boolean sinalOpt(){
+        if (sinalNOpt()){
+            return true;
+        }else{
+            return false;
+        }
+    	
+    }
+    // TERMO_LOOP -> SINAL_N_OPT TERMO TERMO_LOOP | or TERMO TERMO_LOOP | ε
+    private boolean termoLoop(){
+        if (sinalNOpt()){
+            if (termo()){
+                if (termoLoop()){
+                    return true;
+                }else{
+                    return false;
+                }
+            }else{
+                return false;
+            }
+        }else if (t.tipo == Token.Tipo.Or){
+            if (termo()){
+                if (termoLoop()){
+                    return true;
+                }else{
+                    return false;
+                }
+            }else{
+                return false;
+            }
+        }else{
+            return true;
+        }
+    }
+    // TERMO -> FATOR FATOR_LOOP
+    private boolean termo(){
+    	if (fator()){
+            if (fatorLoop()){
+                return true;
+            }else{
+                return false;
+            }
+        }else{
+            return false;
+        }
+    }
+    // FATOR_LOOP -> * FATOR FATOR_LOOP | div FATOR FATOR_LOOP | 
+    // and FATOR FATOR_LOOP | ε
+    private boolean fatorLoop(){
+        if(t.tipo == Token.Tipo.Operador_Multiplicacao){
+            getToken();
+            if (fator()){
+                if (fatorLoop()){
+                    return true;
+                }else{
+                    return false;
+                }
+            }else{
+                return false;
+            }
+        }else if(t.tipo == Token.Tipo.Operador_Divisao){
+            getToken();
+            if (fator()){
+                if (fatorLoop()){
+                    return true;
+                }else{
+                    return false;
+                }
+            }else{
+                return false;
+            }
+        }else if(t.tipo == Token.Tipo.And){
+            getToken();
+            if (fator()){
+                if (fatorLoop()){
+                    return true;
+                }else{
+                    return false;
+                }
+            }else{
+                return false;
+            }
+        }else{
+            return true;
+        }
+    	
+    }
+    // VARIAVEL -> identificador EXPR_OPT
+    private boolean variavel(){
+        if (t.tipo == Token.Tipo.Identificador){
+            getToken();
+            if (exprOpt()){
+                return true;
+            }else{
+                return false;
+            }
+        }else{
+            return false;
+        }
+    }
+    // FATOR -> VARIAVEL | numero | ( EXPRESSAO ) | not FATOR
+    private boolean fator(){
+        if (variavel()){
+            return true;
+        }
+        else if(t.tipo == Token.Tipo.Numero_Real || 
+                t.tipo == Token.Tipo.Numero_Inteiro
+                ){
+            getToken();
+            return true;
+        }
+        else if(t.tipo == Token.Tipo.Parenteses_Abre){
+            getToken();
+            if (expressao()){
+                if(t.tipo == Token.Tipo.Parenteses_Fecha){
+                    getToken();
+                    return true;
+                }else{
+                    return false;
+                }
+            }else{
+                return false;
+            }
+        }else if(t.tipo == Token.Tipo.Not){
+            getToken();
+            if (fator()){
+                return true;
+            }else{
+                return false;
+            }
+        }else{
+            return false;
+        }
+    }
+    // EXPR_OPT -> EXPRESSAO | ε
+    private boolean exprOpt(){
+    	if(expressao()){
+            return true;
+        }else{
+            return true;
+        }
+    }
+    // LISTA_EXPR -> EXPRESSAO EXPR_LOOP
+    private boolean listaExp(){
+        if(expressao()){
+            if(exprLoop()){
+                return true;
+            }else{
+                return false;
+            }
+        }else{
+            return false;
+        }
+    }
+    // EXPR_LOOP -> , EXPRESSAO EXPR_LOOP | ε
+    private boolean exprLoop(){
+        if (t.tipo == Token.Tipo.Virgula){
+            getToken();
+            if(expressao()){
+                if(exprLoop()){
+                    return true;
+                }else{
+                    return false;
+                }
+            }else{
+                return false;
+            }
+        
+        }else{
+            // Vazio
+            return true;
+        }
+    	
     }
     
-    private boolean startIdent(Token t){
-    	return true;
+    private void getToken(){
+    	t = al.getToken();
     }
-    
-    private boolean optIdent(Token t){
-    	return true;
-    }
-    
-    private boolean optListaExp(Token t){
-    	return true;
-    }
-    
-    private boolean cmdCond(Token t){
-    	return true;
-    }
-    
-    private boolean elseCmdOpt(Token t){
-    	return true;
-    }
-    
-    private boolean cmdRep(Token t){
-    	return true;
-    }
-    
-    private boolean expressao(Token t){
-    	return true;
-    }
-    
-    private boolean relaOpt(Token t){
-    	return true;
-    }
-    
-    private boolean relacao(Token t){
-    	return true;
-    }
-    
-    private boolean expSimpl(Token t){
-    	return true;
-    }
-    
-    private boolean sinalNOpt(Token t){
-    	return true;
-    }
-    
-    private boolean sinalOpt(Token t){
-    	return true;
-    }
-    
-    private boolean termoLoop(Token t){
-    	return true;
-    }
-    
-    private boolean termo(Token t){
-    	return true;
-    }
-    
-    private boolean fatorLoop(Token t){
-    	return true;
-    }
-    
-    private boolean variavel(Token t){
-    	return true;
-    }
-    
-    private boolean fator(Token t){
-    	return true;
-    }
-    
-    private boolean exprOpt(Token t){
-    	return true;
-    }
-    
-    private boolean listaExp(Token t){
-    	return true;
-    }
-    
-    private boolean exprLoop(Token t){
-    	return true;
-    }
-    
-    
 }
