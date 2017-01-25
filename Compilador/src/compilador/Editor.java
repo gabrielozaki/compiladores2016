@@ -187,7 +187,7 @@ public class Editor extends javax.swing.JFrame {
     private void LexicoMenuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_LexicoMenuActionPerformed
         //Obtem as equacoes
         //Trocar a textArea no futuro por um JPaneText?
-        String str = EditorTexto.getText()+"\n";
+        String str = EditorTexto.getText() + "\n";
         //Pra limpar
         this.as = new AnalisadorSintatico();
         //Recebe uma lista de tokens 
@@ -335,6 +335,14 @@ public class Editor extends javax.swing.JFrame {
     private void SintaticoMenuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_SintaticoMenuActionPerformed
         // TODO add your handling code here:
         as.executaAnalise();
+        String s = ErroPane.getText();
+        if (as.erro.size() >= 1) {
+            for (String e : erro) {
+                s = s + "\n" + e;
+            }
+            ResultadosTab.setSelectedIndex(1);
+        }
+
     }//GEN-LAST:event_SintaticoMenuActionPerformed
 
     private void coloreCodigo() {
