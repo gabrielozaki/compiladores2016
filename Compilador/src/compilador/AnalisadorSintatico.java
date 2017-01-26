@@ -18,10 +18,11 @@ public class AnalisadorSintatico {
 
     private AnalisadorLexico al = new AnalisadorLexico();
     private Token t;
-    private List<String> erro = new ArrayList<String>();
+    public List<String> erro = new ArrayList<String>();
 
     private List<Token.Tipo> followProgram = new ArrayList<Token.Tipo>();
     private List<Token.Tipo> followBloco = new ArrayList<Token.Tipo>();
+    private List<Token.Tipo> followProgramPontoEVirgula = new ArrayList<Token.Tipo>();
     private List<Token.Tipo> followTipo = new ArrayList<Token.Tipo>();
     private List<Token.Tipo> followParteDeclVar = new ArrayList<Token.Tipo>();
     private List<Token.Tipo> followDeclVarLoop = new ArrayList<Token.Tipo>();
@@ -55,6 +56,51 @@ public class AnalisadorSintatico {
     private List<Token.Tipo> followExprOpt = new ArrayList<Token.Tipo>();
     private List<Token.Tipo> followListaExpr = new ArrayList<Token.Tipo>();
     private List<Token.Tipo> followExprLoop = new ArrayList<Token.Tipo>();
+    
+    
+    // FIRSTs
+    
+    private List<Token.Tipo> firstProgram = new ArrayList<Token.Tipo>();
+    private List<Token.Tipo> firstBloco = new ArrayList<Token.Tipo>();
+    private List<Token.Tipo> firstIdentLoop = new ArrayList<Token.Tipo>();
+    private List<Token.Tipo> firstParamForm = new ArrayList<Token.Tipo>();
+    private List<Token.Tipo> firstSecParamForm = new ArrayList<Token.Tipo>();
+
+
+    /*private List<Token.Tipo> followProgramPontoEVirgula = new ArrayList<Token.Tipo>();
+    private List<Token.Tipo> followTipo = new ArrayList<Token.Tipo>();
+    private List<Token.Tipo> followParteDeclVar = new ArrayList<Token.Tipo>();
+    private List<Token.Tipo> followDeclVarLoop = new ArrayList<Token.Tipo>();
+    private List<Token.Tipo> followDeclVar = new ArrayList<Token.Tipo>();
+    private List<Token.Tipo> followListaIdent = new ArrayList<Token.Tipo>();
+    
+    private List<Token.Tipo> followDeclProc = new ArrayList<Token.Tipo>();
+    private List<Token.Tipo> followParamForm = new ArrayList<Token.Tipo>();
+    private List<Token.Tipo> followSecParamFormLoop = new ArrayList<Token.Tipo>();
+    private List<Token.Tipo> followSecParamForm = new ArrayList<Token.Tipo>();
+    private List<Token.Tipo> followCmdComposto = new ArrayList<Token.Tipo>();
+    private List<Token.Tipo> followCmdLoop = new ArrayList<Token.Tipo>();
+    private List<Token.Tipo> followComando = new ArrayList<Token.Tipo>();
+    private List<Token.Tipo> followStartIdent = new ArrayList<Token.Tipo>();
+    private List<Token.Tipo> followOptIdent = new ArrayList<Token.Tipo>();
+    private List<Token.Tipo> followOptListaExpr = new ArrayList<Token.Tipo>();
+    private List<Token.Tipo> followCmdCond = new ArrayList<Token.Tipo>();
+    private List<Token.Tipo> followElseCmdOpt = new ArrayList<Token.Tipo>();
+    private List<Token.Tipo> followCmdRep = new ArrayList<Token.Tipo>();
+    private List<Token.Tipo> followExpressao = new ArrayList<Token.Tipo>();
+    private List<Token.Tipo> followRelaOpt = new ArrayList<Token.Tipo>();
+    private List<Token.Tipo> followRelacao = new ArrayList<Token.Tipo>();
+    private List<Token.Tipo> followExprSimpl = new ArrayList<Token.Tipo>();
+    private List<Token.Tipo> followSinalNOpt = new ArrayList<Token.Tipo>();
+    private List<Token.Tipo> followSinalOpt = new ArrayList<Token.Tipo>();
+    private List<Token.Tipo> followTermoLoop = new ArrayList<Token.Tipo>();
+    private List<Token.Tipo> followTermo = new ArrayList<Token.Tipo>();
+    private List<Token.Tipo> followFatorLoop = new ArrayList<Token.Tipo>();
+    private List<Token.Tipo> followVariavel = new ArrayList<Token.Tipo>();
+    private List<Token.Tipo> followFator = new ArrayList<Token.Tipo>();
+    private List<Token.Tipo> followExprOpt = new ArrayList<Token.Tipo>();
+    private List<Token.Tipo> followListaExpr = new ArrayList<Token.Tipo>();
+    private List<Token.Tipo> followExprLoop = new ArrayList<Token.Tipo>();*/
 
     public static void AnalisadorSintatico() {
         //so cria o construtor
@@ -316,55 +362,67 @@ public class AnalisadorSintatico {
         followListaExpr.add(Token.Tipo.Parenteses_Fecha);
         
         followExprLoop.add(Token.Tipo.Parenteses_Fecha);
+        
+        firstBloco.add(Token.Tipo.Identificador);
+        firstBloco.add(Token.Tipo.Procedure);
+        firstBloco.add(Token.Tipo.Composto_inicio);
+        firstIdentLoop.add(Token.Tipo.Virgula);
+        firstParamForm.add(Token.Tipo.Parenteses_Abre);
+        firstSecParamForm.add(Token.Tipo.Variavel);
+        firstSecParamForm.add(Token.Tipo.Identificador);
     }
 
     private boolean program() {
         //  System.out.println("program");
 
-        if (t.tipo != Token.Tipo.Programa) {
-
-            if (!modoPanico(Token.Tipo.Programa, followProgram)) {
-                return false;
-            }
-            //           return false;
-        }
-
-        getToken();
-
-        if (t.tipo != Token.Tipo.Identificador
-                && t.tipo != Token.Tipo.Inteiro
-                && t.tipo != Token.Tipo.Real
-                && t.tipo != Token.Tipo.Valor_Boleano
-                && t.tipo != Token.Tipo.Leitura
-                && t.tipo != Token.Tipo.Escrita
-                && t.tipo != Token.Tipo.Booleano) {
-            if (!modoPanico(Token.Tipo.Identificador, followIdentLoop)) {
+        if (t.tipo == Token.Tipo.Programa) {
+            getToken();
+        }else{
+            List<Token.Tipo> sinc_array = new ArrayList<Token.Tipo>();
+            sinc_array.add(Token.Tipo.Identificador);
+            if (!modoPanico(Token.Tipo.Programa, sinc_array )) {
                 return false;
             }
         }
 
-        getToken();
-
-        if (t.tipo != Token.Tipo.Ponto_Virgula) {
-            if (!modoPanico(Token.Tipo.Ponto_Virgula, followPontoVirgula)) {
+        if (t.tipo == Token.Tipo.Identificador
+                && t.tipo == Token.Tipo.Inteiro
+                && t.tipo == Token.Tipo.Real
+                && t.tipo == Token.Tipo.Valor_Boleano
+                && t.tipo == Token.Tipo.Leitura
+                && t.tipo == Token.Tipo.Escrita
+                && t.tipo == Token.Tipo.Booleano) {
+            getToken();
+        }else{
+            List<Token.Tipo> sinc_array = new ArrayList<>();
+            sinc_array.add(Token.Tipo.Ponto_Virgula);
+            if (!modoPanico(Token.Tipo.Identificador, sinc_array)) {
                 return false;
             }
         }
 
-        getToken();
-
-        if (bloco()) {
-
-            if (t.tipo != Token.Tipo.Composto_fim_codigo) {
-                if (!modoPanico(Token.Tipo.Composto_fim_codigo)) {
-                    return false;
-                }
+        if (t.tipo == Token.Tipo.Ponto_Virgula) {
+            getToken();
+        }else{
+            List<Token.Tipo> sinc_array = new ArrayList<>();
+            sinc_array.addAll(firstBloco);
+            sinc_array.add(Token.Tipo.Composto_fim_codigo);
+            if (!modoPanico(Token.Tipo.Ponto_Virgula, sinc_array) ){
+                return false;
             }
-            return true;
-        } else {
-            return false;
         }
 
+        bloco();
+        
+        if (t.tipo == Token.Tipo.Composto_fim_codigo) {
+            getToken();
+        }else{
+            List<Token.Tipo> sinc_array = new ArrayList<>();
+            if (!modoPanico(Token.Tipo.Composto_fim_codigo, sinc_array)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private boolean bloco() {
@@ -402,10 +460,11 @@ public class AnalisadorSintatico {
             getToken();
             return true;
         } else {
-            logErro(t, Token.Tipo.Identificador.name());
-
-            return false;
+            if (!modoPanico(Token.Tipo.Identificador, followTipo)) {
+                return false;
+            }
         }
+        return true;
     }
 
     private boolean parteDeclVar() {
@@ -413,15 +472,17 @@ public class AnalisadorSintatico {
         if (declVar()) {
             if (t.tipo == Token.Tipo.Ponto_Virgula) {
                 getToken();
-                if (parteDeclVar()) {
-                    return true;
-                } else {
+            }else{
+                if (!modoPanico(Token.Tipo.Ponto_Virgula, followParteDeclVar)) {
                     return false;
                 }
+            } 
+            if (parteDeclVar()) {
+                return true;
             } else {
-                logErro(t, Token.Tipo.Ponto_Virgula.name());
                 return false;
             }
+            
         } else {
             //vazio
             removeErro();
@@ -454,13 +515,18 @@ public class AnalisadorSintatico {
                 || t.tipo == Token.Tipo.Escrita
                 || t.tipo == Token.Tipo.Booleano) {
             getToken();
-            if (identLoop()) {
-                return true;
-            } else {
-                return false;
-            }
+            
         } else {
-            logErro(t, Token.Tipo.Identificador.name());
+            List<Token.Tipo> sinc_array = new ArrayList<>();
+            sinc_array.addAll(firstIdentLoop);
+            sinc_array.addAll(followListaIdent);           
+            if (!modoPanico(Token.Tipo.Identificador, sinc_array)) {
+                    return false;
+            }
+        }
+        if (identLoop()) {
+            return true;
+        } else {
             return false;
         }
     }
@@ -476,19 +542,23 @@ public class AnalisadorSintatico {
                     || t.tipo == Token.Tipo.Leitura
                     || t.tipo == Token.Tipo.Escrita
                     || t.tipo == Token.Tipo.Booleano) {
-                getToken();
-                if (identLoop()) {
-                    return true;
-                } else {
-                    return false;
-                }
+                getToken();              
             } else {
-                logErro(t, Token.Tipo.Identificador.name());
+                List<Token.Tipo> sinc_array = new ArrayList<>();
+                sinc_array.addAll(firstIdentLoop);
+                sinc_array.addAll(followIdentLoop);           
+                if (!modoPanico(Token.Tipo.Identificador, sinc_array)) {
+                        return false;
+                }
+            }
+            if (identLoop()) {
+                return true;
+            } else {
                 return false;
             }
         } else {
             //Vazio
-            removeErro();
+            //removeErro();
             return true;
         }
 
@@ -507,36 +577,48 @@ public class AnalisadorSintatico {
                     || t.tipo == Token.Tipo.Escrita
                     || t.tipo == Token.Tipo.Booleano) {
                 getToken();
-                if (paramForm()) {
+                
+            } else {
+                List<Token.Tipo> sinc_array = new ArrayList<>();
+                sinc_array.addAll(firstParamForm);
+                sinc_array.add(Token.Tipo.Ponto_Virgula);
+                if (!modoPanico(Token.Tipo.Identificador, sinc_array)) {
+                    return false;
+                }
+            }
+            if (paramForm()) {
                     if (t.tipo == Token.Tipo.Ponto_Virgula) {
-                        getToken();
-                        if (bloco()) {
+                        getToken();                        
+                    } else {
+                        List<Token.Tipo> sinc_array = new ArrayList<>();
+                        sinc_array.addAll(firstBloco);
+                        if (!modoPanico(Token.Tipo.Ponto_Virgula, sinc_array)) {
+                            return false;
+                        }
+                    }
+                    if (bloco()) {
                             if (t.tipo == Token.Tipo.Ponto_Virgula) {
                                 getToken();
                                 return true;
                             } else {
-                                logErro(t, Token.Tipo.Ponto_Virgula.name());
-                                return false;
+                                List<Token.Tipo> sinc_array = new ArrayList<>();
+                                sinc_array.addAll(followDeclProc);
+                                if (!modoPanico(Token.Tipo.Ponto_Virgula, sinc_array)) {
+                                    return false;
+                                }
                             }
                         } else {
                             return false;
                         }
-                    } else {
-                        logErro(t, Token.Tipo.Ponto_Virgula.name());
-                        return false;
-                    }
                 } else {
                     return false;
                 }
-            } else {
-                logErro(t, Token.Tipo.Identificador.name());
-                return false;
-            }
         } else {
             //vazio
-            removeErro();
+            //removeErro();
             return true;
         }
+        return true;
     }
 
     //(SEC_PARAM_FORM SEC_PARAM_FORM_LOOP ) | ε
@@ -544,25 +626,33 @@ public class AnalisadorSintatico {
         //System.out.println("paramForm");
         if (t.tipo == Token.Tipo.Parenteses_Abre) {
             getToken();
-            if (secParamForm()) {
+            
+        } else {
+            List<Token.Tipo> sinc_array = new ArrayList<>();
+            sinc_array.addAll(firstSecParamForm);
+            if (!modoPanico(Token.Tipo.Parenteses_Abre, sinc_array)) {
+                return false;
+            }
+        }
+        if (secParamForm()) {
                 if (secParamFormLoop()) {
                     if (t.tipo == Token.Tipo.Parenteses_Fecha) {
                         getToken();
                         return true;
                     } else {
-                        logErro(t, Token.Tipo.Parenteses_Fecha.name());
-                        return false;
+                        List<Token.Tipo> sinc_array = new ArrayList<>();
+                        sinc_array.addAll(followParamForm);
+                        if (!modoPanico(Token.Tipo.Parenteses_Fecha, sinc_array)) {
+                            return false;
+                        }
                     }
                 } else {
                     return false;
                 }
-            } else {
-                return false;
-            }
         } else {
-            logErro(t, Token.Tipo.Parenteses_Abre.name());
-            return true;
+            return false;
         }
+        return true;
     }
 
     //; SEC_PARAM_FORM SEC_PARAM_FORM_LOOP | ε
