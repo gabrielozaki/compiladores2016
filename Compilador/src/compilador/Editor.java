@@ -337,7 +337,7 @@ public class Editor extends javax.swing.JFrame {
         as.executaAnalise();
         String s = ErroPane.getText();
         if (as.erro.size() >= 1) {
-            for (String e : erro) {
+            for (String e : as.erro) {
                 s = s + "\n" + e;
             }
             ResultadosTab.setSelectedIndex(1);

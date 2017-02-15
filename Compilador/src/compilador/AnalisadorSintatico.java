@@ -65,7 +65,10 @@ public class AnalisadorSintatico {
     private List<Token.Tipo> firstIdentLoop = new ArrayList<Token.Tipo>();
     private List<Token.Tipo> firstParamForm = new ArrayList<Token.Tipo>();
     private List<Token.Tipo> firstSecParamForm = new ArrayList<Token.Tipo>();
-
+    private List<Token.Tipo> firstComando = new ArrayList<Token.Tipo>();
+    private List<Token.Tipo> firstCmdLoop = new ArrayList<Token.Tipo>();
+    private List<Token.Tipo> firstOptIdent = new ArrayList<Token.Tipo>();
+    private List<Token.Tipo> firstExpressao = new ArrayList<Token.Tipo>();
 
     /*private List<Token.Tipo> followProgramPontoEVirgula = new ArrayList<Token.Tipo>();
     private List<Token.Tipo> followTipo = new ArrayList<Token.Tipo>();
@@ -104,6 +107,8 @@ public class AnalisadorSintatico {
 
     public static void AnalisadorSintatico() {
         //so cria o construtor
+        System.out.println("compilador.AnalisadorSintatico.AnalisadorSintatico()");
+        
     }
 
     public void populaLexico(String codigoFonte) {
@@ -121,17 +126,17 @@ public class AnalisadorSintatico {
             System.out.println(t.lexema);
             t = al.getToken();
         }*/
-        status = program();
+        program();
 
         for (String e : erro) {
             System.out.println(e);
         }
-
+        /*
         if (status) {
             System.out.println("Sucesso");
         } else {
             System.out.println("Falha");
-        }
+        }*/
 
     }
 
@@ -370,9 +375,27 @@ public class AnalisadorSintatico {
         firstParamForm.add(Token.Tipo.Parenteses_Abre);
         firstSecParamForm.add(Token.Tipo.Variavel);
         firstSecParamForm.add(Token.Tipo.Identificador);
+        firstComando.add(Token.Tipo.Identificador);
+        firstComando.add(Token.Tipo.Composto_inicio);
+        firstComando.add(Token.Tipo.Condicional);
+        firstComando.add(Token.Tipo.Repeticao);
+        firstCmdLoop.add(Token.Tipo.Ponto_Virgula);
+        firstOptIdent.add(Token.Tipo.Atribuicao);
+        firstOptIdent.add(Token.Tipo.Operador_Soma);
+        firstOptIdent.add(Token.Tipo.Operador_Subtracao);
+        firstOptIdent.add(Token.Tipo.Identificador);
+        firstOptIdent.add(Token.Tipo.Numero_Inteiro);
+        firstOptIdent.add(Token.Tipo.Parenteses_Abre);
+        firstOptIdent.add(Token.Tipo.Not);
+        firstExpressao.add(Token.Tipo.Operador_Soma);
+        firstExpressao.add(Token.Tipo.Operador_Subtracao);
+        firstExpressao.add(Token.Tipo.Identificador);
+        firstExpressao.add(Token.Tipo.Numero_Inteiro);
+        firstExpressao.add(Token.Tipo.Parenteses_Abre);
+        firstExpressao.add(Token.Tipo.Not);
+        
     }
-
-    private boolean program() {
+    private void program() {
         //  System.out.println("program");
 
         if (t.tipo == Token.Tipo.Programa) {
@@ -380,25 +403,15 @@ public class AnalisadorSintatico {
         }else{
             List<Token.Tipo> sinc_array = new ArrayList<Token.Tipo>();
             sinc_array.add(Token.Tipo.Identificador);
-            if (!modoPanico(Token.Tipo.Programa, sinc_array )) {
-                return false;
-            }
+            modoPanico(Token.Tipo.Programa, sinc_array );
         }
 
-        if (t.tipo == Token.Tipo.Identificador
-                && t.tipo == Token.Tipo.Inteiro
-                && t.tipo == Token.Tipo.Real
-                && t.tipo == Token.Tipo.Valor_Boleano
-                && t.tipo == Token.Tipo.Leitura
-                && t.tipo == Token.Tipo.Escrita
-                && t.tipo == Token.Tipo.Booleano) {
+        if (t.tipo == Token.Tipo.Identificador) {
             getToken();
         }else{
             List<Token.Tipo> sinc_array = new ArrayList<>();
             sinc_array.add(Token.Tipo.Ponto_Virgula);
-            if (!modoPanico(Token.Tipo.Identificador, sinc_array)) {
-                return false;
-            }
+            modoPanico(Token.Tipo.Identificador, sinc_array);
         }
 
         if (t.tipo == Token.Tipo.Ponto_Virgula) {
@@ -407,9 +420,7 @@ public class AnalisadorSintatico {
             List<Token.Tipo> sinc_array = new ArrayList<>();
             sinc_array.addAll(firstBloco);
             sinc_array.add(Token.Tipo.Composto_fim_codigo);
-            if (!modoPanico(Token.Tipo.Ponto_Virgula, sinc_array) ){
-                return false;
-            }
+            modoPanico(Token.Tipo.Ponto_Virgula, sinc_array);
         }
 
         bloco();
@@ -418,796 +429,570 @@ public class AnalisadorSintatico {
             getToken();
         }else{
             List<Token.Tipo> sinc_array = new ArrayList<>();
-            if (!modoPanico(Token.Tipo.Composto_fim_codigo, sinc_array)) {
-                return false;
-            }
+            modoPanico(Token.Tipo.Composto_fim_codigo, sinc_array);
         }
-        return true;
     }
 
-    private boolean bloco() {
+    private void bloco() {
         //  System.out.println("bloco");
-        if (parteDeclVar()) {
-            if (declProc()) {
-                if (cmdComposto()) {
-                    return true;
-                } else {
-                    //caso especial, como o cmdcomposto não pode processar o fim de codigo e sua recursividade o força a tentar
-                    //Fazemos essa verificação para que ele chegue ao final da execução
-                    if (t.tipo == Token.Tipo.Composto_fim_codigo) {
-                        return true;
-                    }
-                    return false;
-                }
-            } else {
-                return false;
-            }
-        } else {
-            return false;
-        }
-
+        parteDeclVar();
+        declProc();
+        cmdComposto();
     }
 
-    private boolean tipo() {
+    private void tipo() {
         //System.out.println("tipo");
-        if (t.tipo == Token.Tipo.Identificador
-                || t.tipo == Token.Tipo.Inteiro
-                || t.tipo == Token.Tipo.Real
-                || t.tipo == Token.Tipo.Valor_Boleano
-                || t.tipo == Token.Tipo.Leitura
-                || t.tipo == Token.Tipo.Escrita
-                || t.tipo == Token.Tipo.Booleano) {
+        if (t.tipo == Token.Tipo.Identificador) {
             getToken();
-            return true;
         } else {
-            if (!modoPanico(Token.Tipo.Identificador, followTipo)) {
-                return false;
-            }
+            modoPanico(Token.Tipo.Identificador, followTipo);
         }
-        return true;
     }
 
-    private boolean parteDeclVar() {
+    private void parteDeclVar() {
         //System.out.println("partDeclVar");
-        if (declVar()) {
+        // Se o first de declvar for o próximo token a ver é executada
+        if (t.tipo == Token.Tipo.Identificador) {
+            declVar();
             if (t.tipo == Token.Tipo.Ponto_Virgula) {
                 getToken();
             }else{
-                if (!modoPanico(Token.Tipo.Ponto_Virgula, followParteDeclVar)) {
-                    return false;
-                }
+                modoPanico(Token.Tipo.Ponto_Virgula, followParteDeclVar);
             } 
-            if (parteDeclVar()) {
-                return true;
-            } else {
-                return false;
-            }
-            
-        } else {
+            parteDeclVar();
+        } 
+        // Senão nada ocorre pois existe movimento vazio
+        else {
             //vazio
-            removeErro();
-            return true;
-
         }
     }
 
-    private boolean declVar() {
-        //System.out.println("declVar");
-        if (tipo()) {
-            if (listaIdent()) {
-                return true;
-            } else {
-                return false;
-            }
-        } else {
-            return false;
-        }
-
+    private void declVar() {
+        //System.out.println("declVar");        
+        tipo();
+        listaIdent();
     }
 
-    private boolean listaIdent() {
+    private void listaIdent() {
         //System.out.println("listaIdent");
-        if (t.tipo == Token.Tipo.Identificador
-                || t.tipo == Token.Tipo.Inteiro
-                || t.tipo == Token.Tipo.Real
-                || t.tipo == Token.Tipo.Valor_Boleano
-                || t.tipo == Token.Tipo.Leitura
-                || t.tipo == Token.Tipo.Escrita
-                || t.tipo == Token.Tipo.Booleano) {
+        if (t.tipo == Token.Tipo.Identificador) {
             getToken();
-            
         } else {
             List<Token.Tipo> sinc_array = new ArrayList<>();
             sinc_array.addAll(firstIdentLoop);
             sinc_array.addAll(followListaIdent);           
-            if (!modoPanico(Token.Tipo.Identificador, sinc_array)) {
-                    return false;
-            }
+            modoPanico(Token.Tipo.Identificador, sinc_array);
         }
-        if (identLoop()) {
-            return true;
-        } else {
-            return false;
-        }
+        identLoop();
     }
 
-    private boolean identLoop() {
+    private void identLoop() {
         //System.out.println("identLoop");
         if (t.tipo == Token.Tipo.Virgula) {
             getToken();
-            if (t.tipo == Token.Tipo.Identificador
-                    || t.tipo == Token.Tipo.Inteiro
-                    || t.tipo == Token.Tipo.Real
-                    || t.tipo == Token.Tipo.Valor_Boleano
-                    || t.tipo == Token.Tipo.Leitura
-                    || t.tipo == Token.Tipo.Escrita
-                    || t.tipo == Token.Tipo.Booleano) {
+            if (t.tipo == Token.Tipo.Identificador) {
                 getToken();              
             } else {
                 List<Token.Tipo> sinc_array = new ArrayList<>();
                 sinc_array.addAll(firstIdentLoop);
                 sinc_array.addAll(followIdentLoop);           
-                if (!modoPanico(Token.Tipo.Identificador, sinc_array)) {
-                        return false;
-                }
+                modoPanico(Token.Tipo.Identificador, sinc_array);
             }
-            if (identLoop()) {
-                return true;
-            } else {
-                return false;
-            }
+            identLoop();
+            
         } else {
             //Vazio
-            //removeErro();
-            return true;
         }
-
     }
 
     //procedure identificador PARAM_FORM ; BLOCO ; | ε
-    private boolean declProc() {
+    private void declProc() {
         //System.out.println("declProc");
         if (t.tipo == Token.Tipo.Procedure) {
             getToken();
-            if (t.tipo == Token.Tipo.Identificador
-                    || t.tipo == Token.Tipo.Inteiro
-                    || t.tipo == Token.Tipo.Real
-                    || t.tipo == Token.Tipo.Valor_Boleano
-                    || t.tipo == Token.Tipo.Leitura
-                    || t.tipo == Token.Tipo.Escrita
-                    || t.tipo == Token.Tipo.Booleano) {
+            if (t.tipo == Token.Tipo.Identificador) {
                 getToken();
                 
             } else {
                 List<Token.Tipo> sinc_array = new ArrayList<>();
                 sinc_array.addAll(firstParamForm);
                 sinc_array.add(Token.Tipo.Ponto_Virgula);
-                if (!modoPanico(Token.Tipo.Identificador, sinc_array)) {
-                    return false;
-                }
+                sinc_array.addAll(followDeclProc);
+                modoPanico(Token.Tipo.Identificador, sinc_array);
             }
-            if (paramForm()) {
-                    if (t.tipo == Token.Tipo.Ponto_Virgula) {
-                        getToken();                        
-                    } else {
-                        List<Token.Tipo> sinc_array = new ArrayList<>();
-                        sinc_array.addAll(firstBloco);
-                        if (!modoPanico(Token.Tipo.Ponto_Virgula, sinc_array)) {
-                            return false;
-                        }
-                    }
-                    if (bloco()) {
-                            if (t.tipo == Token.Tipo.Ponto_Virgula) {
-                                getToken();
-                                return true;
-                            } else {
-                                List<Token.Tipo> sinc_array = new ArrayList<>();
-                                sinc_array.addAll(followDeclProc);
-                                if (!modoPanico(Token.Tipo.Ponto_Virgula, sinc_array)) {
-                                    return false;
-                                }
-                            }
-                        } else {
-                            return false;
-                        }
-                } else {
-                    return false;
-                }
+            paramForm();
+            if (t.tipo == Token.Tipo.Ponto_Virgula) {
+                getToken();                        
+            } else {
+                List<Token.Tipo> sinc_array = new ArrayList<>();
+                sinc_array.addAll(followDeclProc);
+                modoPanico(Token.Tipo.Ponto_Virgula, sinc_array);
+            }
+            bloco();
+            if (t.tipo == Token.Tipo.Ponto_Virgula) {
+                getToken();                        
+            } else {
+                List<Token.Tipo> sinc_array = new ArrayList<>();
+                sinc_array.addAll(followDeclProc);
+                modoPanico(Token.Tipo.Ponto_Virgula, sinc_array);
+            }
+                    
         } else {
             //vazio
-            //removeErro();
-            return true;
         }
-        return true;
     }
 
     //(SEC_PARAM_FORM SEC_PARAM_FORM_LOOP ) | ε
-    private boolean paramForm() {
+    private void paramForm() {
         //System.out.println("paramForm");
         if (t.tipo == Token.Tipo.Parenteses_Abre) {
             getToken();
-            
-        } else {
-            List<Token.Tipo> sinc_array = new ArrayList<>();
-            sinc_array.addAll(firstSecParamForm);
-            if (!modoPanico(Token.Tipo.Parenteses_Abre, sinc_array)) {
-                return false;
+            secParamForm();
+            secParamFormLoop();
+            if (t.tipo == Token.Tipo.Parenteses_Fecha) {
+                getToken();
+                
+            } else {
+                List<Token.Tipo> sinc_array = new ArrayList<>();
+                sinc_array.addAll(followParamForm);
+                modoPanico(Token.Tipo.Parenteses_Fecha, sinc_array);
             }
+        } 
+        else {
+            //vazio
         }
-        if (secParamForm()) {
-                if (secParamFormLoop()) {
-                    if (t.tipo == Token.Tipo.Parenteses_Fecha) {
-                        getToken();
-                        return true;
-                    } else {
-                        List<Token.Tipo> sinc_array = new ArrayList<>();
-                        sinc_array.addAll(followParamForm);
-                        if (!modoPanico(Token.Tipo.Parenteses_Fecha, sinc_array)) {
-                            return false;
-                        }
-                    }
-                } else {
-                    return false;
-                }
-        } else {
-            return false;
-        }
-        return true;
+        
     }
 
     //; SEC_PARAM_FORM SEC_PARAM_FORM_LOOP | ε
-    private boolean secParamFormLoop() {
+    private void secParamFormLoop() {
         // System.out.println("secParamFormLoop");
         if (t.tipo == Token.Tipo.Ponto_Virgula) {
             getToken();
-            if (secParamForm()) {
-                if (secParamFormLoop()) {
-                    return true;
-                } else {
-                    return false;
-                }
-            } else {
-                return false;
-            }
+            secParamForm();
+            secParamFormLoop();
         } else {
             //vazio
-            removeErro();
-            return true;
         }
 
     }
 
     //var LISTA_IDENT : identificador | LISTA_IDENT : identificador
-    private boolean secParamForm() {
+    private void secParamForm() {
         //System.out.println("secParamForm");
         if (t.tipo == Token.Tipo.Variavel) {
             getToken();
-            if (listaIdent()) {
-                if (t.tipo == Token.Tipo.Dois_Pontos) {
-                    getToken();
-                    if (t.tipo == Token.Tipo.Identificador
-                            || t.tipo == Token.Tipo.Inteiro
-                            || t.tipo == Token.Tipo.Real
-                            || t.tipo == Token.Tipo.Valor_Boleano
-                            || t.tipo == Token.Tipo.Leitura
-                            || t.tipo == Token.Tipo.Escrita
-                            || t.tipo == Token.Tipo.Booleano) {
-                        getToken();
-                        return true;
-                    } else {
-                        logErro(t, Token.Tipo.Identificador.name());
-                        return false;
-                    }
-                } else {
-                    logErro(t, Token.Tipo.Dois_Pontos.name());
-                    return false;
-                }
-            } else {
-                return false;
-            }
-        } else if (listaIdent()) {
+            listaIdent();
             if (t.tipo == Token.Tipo.Dois_Pontos) {
                 getToken();
-                if (t.tipo == Token.Tipo.Identificador
-                        || t.tipo == Token.Tipo.Inteiro
-                        || t.tipo == Token.Tipo.Real
-                        || t.tipo == Token.Tipo.Valor_Boleano
-                        || t.tipo == Token.Tipo.Leitura
-                        || t.tipo == Token.Tipo.Escrita
-                        || t.tipo == Token.Tipo.Booleano) {
-                    getToken();
-                    return true;
-                } else {
-                    return false;
-                }
+                 
             } else {
-                return false;
+                List<Token.Tipo> sinc_array = new ArrayList<>();
+                sinc_array.add(Token.Tipo.Identificador);
+                sinc_array.addAll(followSecParamForm);
+                modoPanico(Token.Tipo.Dois_Pontos, sinc_array);
+            }
+            if (t.tipo == Token.Tipo.Identificador) {
+                    getToken();
+            } else {
+                List<Token.Tipo> sinc_array = new ArrayList<>();
+                sinc_array.addAll(followSecParamForm);
+                modoPanico(Token.Tipo.Identificador, sinc_array);
             }
         } else {
-            return false;
+            listaIdent();
+            if (t.tipo == Token.Tipo.Dois_Pontos) {
+                getToken();
+            }
+            else{
+                List<Token.Tipo> sinc_array = new ArrayList<>();
+                sinc_array.add(Token.Tipo.Identificador);
+                sinc_array.addAll(followSecParamForm);
+                modoPanico(Token.Tipo.Dois_Pontos, sinc_array);
+            }
+            if (t.tipo == Token.Tipo.Identificador) {
+                getToken();
+            } else {
+                List<Token.Tipo> sinc_array = new ArrayList<>();
+                sinc_array.addAll(followSecParamForm);
+                modoPanico(Token.Tipo.Identificador, sinc_array);
+            }
         }
 
     }
 
     //begin COMANDO CMD_LOOP end
-    private boolean cmdComposto() {
+    private void cmdComposto() {
         //System.out.println("cmdComposto");
         if (t.tipo == Token.Tipo.Composto_inicio) {
             getToken();
-            if (comando()) {
-                if (cmdLoop()) {
-                    if (t.tipo == Token.Tipo.Composto_fim) {
-                        getToken();
-                        return true;
-                    } else {
-                        if (t.tipo != Token.Tipo.Composto_fim_codigo) {
-                            logErro(t, Token.Tipo.Composto_fim.name());
-                        }
-                        return false;
-                    }
-                } else {
-                    return false;
-                }
-            } else {
-                return false;
-            }
+        }else{
+            List<Token.Tipo> sinc_array = new ArrayList<>();
+            sinc_array.addAll(firstComando);
+            modoPanico(Token.Tipo.Composto_inicio, sinc_array);
+        }
+        comando();
+        cmdLoop();
+        if (t.tipo == Token.Tipo.Composto_fim) {
+            getToken();
         } else {
-            logErro(t, Token.Tipo.Composto_inicio.name());
-            return false;
+            List<Token.Tipo> sinc_array = new ArrayList<>();
+            sinc_array.addAll(followCmdComposto);
+            modoPanico(Token.Tipo.Composto_fim, sinc_array);
         }
     }
 
     //; COMANDO CMD_LOOP | ε
-    private boolean cmdLoop() {
+    private void cmdLoop() {
         //System.out.println("cmdLoop");
         if (t.tipo == Token.Tipo.Ponto_Virgula) {
             getToken();
-            if (comando()) {
-                if (cmdLoop()) {
-                    return true;
-                } else {
-                    return false;
-                }
-            } else {
-                return false;
-            }
+            comando();
+            cmdLoop();
         } else {
             //vazio
-            removeErro();
-            return true;
         }
 
     }
 
     //START_IDENT | CMD_COMPOSTO | CMD_COND | CMD_REP
-    private boolean comando() {
+    private void comando() {
         //System.out.println("comando");
-        if (startIdent()) {
-            return true;
-        } else if (cmdComposto()) {
-            return true;
-        } else if (cmdCond()) {
-            return true;
-        } else if (cmdRep()) {
-            return true;
+        //checking first of START_IDENT
+        if (t.tipo == Token.Tipo.Identificador) {
+            startIdent();
+        } 
+        //checking first of cmdComposto
+        else if (t.tipo == Token.Tipo.Composto_inicio) {
+            cmdComposto();
+        } 
+        //checking first of cmdCond
+        else if (t.tipo == Token.Tipo.Condicional) {
+            cmdCond();
+        }
+        //checking first of cmdRep
+        else if (t.tipo == Token.Tipo.Repeticao) {
+            cmdRep();
         } else {
-            return false;
+            List<Token.Tipo> sinc_array = new ArrayList<>();
+            sinc_array.addAll(followComando);
+            modoPanico(Token.Tipo.Identificador, sinc_array);
         }
     }
 
     //identificador OPT_IDENT
-    private boolean startIdent() {
+    private void startIdent() {
         //System.out.println("startIdent");
-        if (t.tipo == Token.Tipo.Identificador
-                || t.tipo == Token.Tipo.Inteiro
-                || t.tipo == Token.Tipo.Real
-                || t.tipo == Token.Tipo.Valor_Boleano
-                || t.tipo == Token.Tipo.Leitura
-                || t.tipo == Token.Tipo.Escrita
-                || t.tipo == Token.Tipo.Booleano) {
+        if (t.tipo == Token.Tipo.Identificador) {
             getToken();
-            if (optIdent()) {
-                return true;
-            } else {
-                return false;
-            }
-        } else {
-            return false;
+        }else {
+            List<Token.Tipo> sinc_array = new ArrayList<>();
+            sinc_array.addAll(firstOptIdent);
+            sinc_array.addAll(followStartIdent);
+            modoPanico(Token.Tipo.Identificador, sinc_array);
         }
+        optIdent();
     }
 
     //:= EXPRESSAO | OPT_LISTA_EXPR | EXPR_OPT
-    private boolean optIdent() {
+    private void optIdent() {
         //System.out.println("optIdent");
         if (t.tipo == Token.Tipo.Atribuicao) {
             getToken();
-            if (expressao()) {
-                return true;
-            } else {
-                return false;
-            }
-        } else if (optListaExp()) {
-            return true;
-        } else if (exprOpt()) {
-            return true;
+            expressao();
+        } 
+        //checking firsts of optListaExp
+        else if (t.tipo == Token.Tipo.Parenteses_Abre) {
+            optListaExp();
+        }
+        //checking firsts of exprOpt +, -,  identificador, numero, (, not
+        else if (t.tipo == Token.Tipo.Parenteses_Abre ||
+                    t.tipo == Token.Tipo.Operador_Soma ||
+                    t.tipo == Token.Tipo.Operador_Subtracao ||
+                    t.tipo == Token.Tipo.Identificador ||
+                    t.tipo == Token.Tipo.Numero_Inteiro ||
+                    t.tipo == Token.Tipo.Not){
+            exprOpt();
         } else {
-            return false;
+            // first de optIdent tem vazio 
         }
 
     }
 
     //( LISTA_EXPR ) | ε
-    private boolean optListaExp() {
+    private void optListaExp() {
         //System.out.println("optListaExp");
         if (t.tipo == Token.Tipo.Parenteses_Abre) {
             getToken();
-            if (listaExp()) {
-                if (t.tipo == Token.Tipo.Parenteses_Fecha) {
-                    getToken();
-                    return true;
-                } else {
-                    logErro(t, Token.Tipo.Parenteses_Fecha.name());
-                    return false;
-                }
+            listaExp();
+            if (t.tipo == Token.Tipo.Parenteses_Fecha) {
+                getToken();
             } else {
-                return false;
+                List<Token.Tipo> sinc_array = new ArrayList<>();
+                sinc_array.addAll(followOptListaExpr);
+                modoPanico(Token.Tipo.Parenteses_Fecha, sinc_array);
             }
         } else {
             //vazio
-            removeErro();
-            return true;
         }
     }
 
     // CMD_COND -> if EXPRESSAO then COMANDO ELSE_CMD_OPT
-    private boolean cmdCond() {
+    private void cmdCond() {
         //System.out.println("cmdCond");
         if (t.tipo == Token.Tipo.Condicional) {
             getToken();
-            if (expressao()) {
-                if (t.tipo == Token.Tipo.Condicionalt) {
-                    getToken();
-                    if (comando()) {
-                        if (elseCmdOpt()) {
-                            return true;
-
-                        } else {
-                            return false;
-                        }
-                    } else {
-                        return false;
-                    }
-                } else {
-                    logErro(t, Token.Tipo.Condicionalt.name());
-                    return false;
-                }
-            } else {
-                return false;
-            }
-        } else {
-            logErro(t, Token.Tipo.Condicional.name());
-            return false;
         }
+        else{
+            List<Token.Tipo> sinc_array = new ArrayList<>();
+            sinc_array.addAll(firstExpressao);
+            modoPanico(Token.Tipo.Condicional, sinc_array);
+        }
+        expressao();
+        if (t.tipo == Token.Tipo.Condicionalt) {
+            getToken();
+        }
+        else{
+            List<Token.Tipo> sinc_array = new ArrayList<>();
+            sinc_array.addAll(firstComando);
+            modoPanico(Token.Tipo.Condicionalt, sinc_array);
+        }
+        comando();
+        elseCmdOpt();
     }
 
     // ELSE_CMD_OPT -> else COMANDO | ε
-    private boolean elseCmdOpt() {
+    private void elseCmdOpt() {
         //System.out.println("elseCmdOpt");
         if (t.tipo == Token.Tipo.Condicionale) {
             getToken();
-            if (comando()) {
-                return true;
-            } else {
-                return false;
-            }
+            comando();
         } else {
-            return true;
+            //vazio
         }
     }
 
     // CMD_REP -> while EXPRESSAO do COMANDO
-    private boolean cmdRep() {
+    private void cmdRep() {
         //System.out.println("cmdRep");
         if (t.tipo == Token.Tipo.Repeticao) {
             getToken();
-            if (expressao()) {
-                if (t.tipo == Token.Tipo.Repeticaod) {
-                    getToken();
-                    if (comando()) {
-                        return true;
-                    } else {
-                        return false;
-                    }
-                } else {
-                    logErro(t, Token.Tipo.Repeticaod.name());
-                    return false;
-                }
-            } else {
-                return false;
-            }
-        } else {
-            logErro(t, Token.Tipo.Repeticao.name());
-            return false;
         }
+        else{
+            List<Token.Tipo> sinc_array = new ArrayList<>();
+            sinc_array.addAll(firstExpressao);
+            modoPanico(Token.Tipo.Repeticao, sinc_array);
+        }
+        expressao();
+        if (t.tipo == Token.Tipo.Repeticaod) {
+            getToken();
+        }else{
+            List<Token.Tipo> sinc_array = new ArrayList<>();
+            sinc_array.addAll(firstComando);
+            modoPanico(Token.Tipo.Repeticao, sinc_array);
+        }
+        comando();
     }
 
     // EXPRESSAO -> EXPR_SIMPL RELA_OPT
-    private boolean expressao() {
+    private void expressao() {
         //System.out.println("expressao");
-        if (expSimpl()) {
-            if (relaOpt()) {
-                return true;
-            } else {
-                return false;
-            }
-        } else {
-            return false;
-        }
+        expSimpl();
+        relaOpt();
     }
 
     // RELA_OPT -> RELACAO EXPR_SIMPL | ε
-    private boolean relaOpt() {
+    private void relaOpt() {
         // System.out.println("relaOpt");
-        if (relacao()) {
-            if (expSimpl()) {
-                return true;
-            } else {
-                return false;
-            }
+        //checking first of relacao
+        if (t.tipo == Token.Tipo.Igual ||
+                t.tipo == Token.Tipo.Maior ||
+                t.tipo == Token.Tipo.Menor
+                //FALTA MAIOR IGUAL E MENOR IGUAL
+                //t.tipo == Token.Tipo
+                ) {
+            relacao();
+            expSimpl();
         } else {
-            return true;
+            // vazio
         }
     }
 
     // RELACAO -> = | <> | < | <= | >= | >
-    private boolean relacao() {
+    private void relacao() {
         //System.out.println("relacao");
         if (t.tipo == Token.Tipo.Maior) {
             getToken();
-            return true;
+            
         } else if (t.tipo == Token.Tipo.Menor) {
             getToken();
-            return true;
+            
         } else if (t.tipo == Token.Tipo.Igual) {
             getToken();
-            return true;
+            
         } else {
-            return false;
+            List<Token.Tipo> sinc_array = new ArrayList<>();
+            sinc_array.addAll(followRelacao);
+            modoPanico(Token.Tipo.Maior, sinc_array);
         }
     }
 
     // EXPR_SIMPL -> SINAL_OPT TERMO TERMO_LOOP
-    private boolean expSimpl() {
+    private void expSimpl() {
         //System.out.println("exprSimpl");
-        if (sinalOpt()) {
-            if (termo()) {
-                if (termoLoop()) {
-                    return true;
-                } else {
-                    return false;
-                }
-            } else {
-                return false;
-            }
-        } else {
-            return false;
-        }
+        sinalOpt();
+        termo();
+        termoLoop();
     }
 
     // SINAL_N_OPT ->  + | - 
-    private boolean sinalNOpt() {
+    private void sinalNOpt() {
         //System.out.println("sinalNOpt");
         if (t.tipo == Token.Tipo.Operador_Soma) {
             getToken();
-            return true;
         } else if (t.tipo == Token.Tipo.Operador_Subtracao) {
             getToken();
-            return true;
         } else {
-            return false;
+            List<Token.Tipo> sinc_array = new ArrayList<>();
+            sinc_array.addAll(followSinalNOpt);
+            modoPanico(Token.Tipo.Operador_Soma, sinc_array);
         }
 
     }
 
     // SINAL_OPT ->  SINAL_N_OPT | ε
-    private boolean sinalOpt() {
+    private void sinalOpt() {
         //System.out.println("sinalOpt");
-        if (sinalNOpt()) {
-            return true;
+        // checking first of sinalNOPt
+        if (t.tipo == Token.Tipo.Operador_Subtracao ||
+                t.tipo == Token.Tipo.Operador_Soma){
+            sinalNOpt();
+            
         } else {
             // vazio
-            removeErro();
-            return true;
         }
-
     }
 
     // TERMO_LOOP -> SINAL_N_OPT TERMO TERMO_LOOP | or TERMO TERMO_LOOP | ε
-    private boolean termoLoop() {
+    private void termoLoop() {
         //System.out.println("termoLoop");
-        if (sinalNOpt()) {
-            if (termo()) {
-                if (termoLoop()) {
-                    return true;
-                } else {
-                    return false;
-                }
-            } else {
-                return false;
-            }
+        // checking first of sinalNOPt
+        if (t.tipo == Token.Tipo.Operador_Subtracao ||
+                t.tipo == Token.Tipo.Operador_Soma){
+            sinalNOpt();
+            termo();
+            termoLoop();
         } else if (t.tipo == Token.Tipo.Or) {
-            if (termo()) {
-                if (termoLoop()) {
-                    return true;
-                } else {
-                    return false;
-                }
-            } else {
-                return false;
-            }
+            termo();
+            termoLoop();
         } else {
             //vario
-            removeErro();
-            return true;
         }
     }
 
     // TERMO -> FATOR FATOR_LOOP
-    private boolean termo() {
+    private void termo() {
         //System.out.println("termo");
-        if (fator()) {
-            if (fatorLoop()) {
-                return true;
-            } else {
-                return false;
-            }
-        } else {
-            return false;
-        }
+        fator();
+        fatorLoop();
     }
 
     // FATOR_LOOP -> * FATOR FATOR_LOOP | div FATOR FATOR_LOOP | 
     // and FATOR FATOR_LOOP | ε
-    private boolean fatorLoop() {
+    private void fatorLoop() {
         //System.out.println("fatorLoop");
         if (t.tipo == Token.Tipo.Operador_Multiplicacao) {
             getToken();
-            if (fator()) {
-                if (fatorLoop()) {
-                    return true;
-                } else {
-                    return false;
-                }
-            } else {
-                return false;
-            }
+            fator();
+            fatorLoop();
         } else if (t.tipo == Token.Tipo.Div) {
             getToken();
-            if (fator()) {
-                if (fatorLoop()) {
-                    return true;
-                } else {
-                    return false;
-                }
-            } else {
-                return false;
-            }
+            fator();
+            fatorLoop();
         } else if (t.tipo == Token.Tipo.And) {
             getToken();
-            if (fator()) {
-                if (fatorLoop()) {
-                    return true;
-                } else {
-                    return false;
-                }
-            } else {
-                return false;
-            }
+            fator();
+            fatorLoop();
         } else {
-            return true;
+            //vazio
         }
 
     }
 
     // VARIAVEL -> identificador EXPR_OPT
-    private boolean variavel() {
+    private void variavel() {
         //System.out.println("variavel");
-        if (t.tipo == Token.Tipo.Identificador
-                || t.tipo == Token.Tipo.Inteiro
-                || t.tipo == Token.Tipo.Real
-                || t.tipo == Token.Tipo.Valor_Boleano
-                || t.tipo == Token.Tipo.Leitura
-                || t.tipo == Token.Tipo.Escrita
-                || t.tipo == Token.Tipo.Booleano) {
+        if (t.tipo == Token.Tipo.Identificador) {
             getToken();
-            if (exprOpt()) {
-                return true;
-            } else {
-                return false;
-            }
+            exprOpt();
         } else {
-            logErro(t, Token.Tipo.Identificador.name());
-            return false;
+            List<Token.Tipo> sinc_array = new ArrayList<>();
+            sinc_array.addAll(followVariavel);
+            modoPanico(Token.Tipo.Identificador, sinc_array);
         }
     }
 
     // FATOR -> VARIAVEL | numero | ( EXPRESSAO ) | not FATOR
-    private boolean fator() {
+    private void fator() {
         //System.out.println("fator");
-        if (variavel()) {
-            return true;
+        // checking variavel first
+        if (t.tipo == Token.Tipo.Identificador) {
+            variavel();
         } else if (t.tipo == Token.Tipo.Numero_Real
                 || t.tipo == Token.Tipo.Numero_Inteiro) {
             getToken();
-            return true;
         } else if (t.tipo == Token.Tipo.Parenteses_Abre) {
             getToken();
-            if (expressao()) {
-                if (t.tipo == Token.Tipo.Parenteses_Fecha) {
-                    getToken();
-                    return true;
-                } else {
-                    return false;
-                }
+            expressao();
+            if (t.tipo == Token.Tipo.Parenteses_Fecha) {
+                getToken();
             } else {
-                return false;
+                List<Token.Tipo> sinc_array = new ArrayList<>();
+                sinc_array.addAll(followFator);
+                modoPanico(Token.Tipo.Parenteses_Fecha, sinc_array);
             }
         } else if (t.tipo == Token.Tipo.Not) {
             getToken();
-            if (fator()) {
-                return true;
-            } else {
-                return false;
-            }
+            fator();
         } else {
-            return false;
+            List<Token.Tipo> sinc_array = new ArrayList<>();
+            sinc_array.addAll(followFator);
+            modoPanico(Token.Tipo.Identificador, sinc_array);
         }
     }
 
     // EXPR_OPT -> EXPRESSAO | ε
-    private boolean exprOpt() {
+    private void exprOpt() {
         // System.out.println("exprOpt");
-        if (expressao()) {
-            return true;
+        //checking first of expressao
+        if (t.tipo == Token.Tipo.Parenteses_Abre ||
+                t.tipo == Token.Tipo.Operador_Soma ||
+                t.tipo == Token.Tipo.Operador_Subtracao ||
+                t.tipo == Token.Tipo.Identificador ||
+                t.tipo == Token.Tipo.Numero_Inteiro ||
+                t.tipo == Token.Tipo.Not){
+            expressao();
         } else {
-            removeErro();
-            return true;
+            //vazio
         }
     }
 
     // LISTA_EXPR -> EXPRESSAO EXPR_LOOP
-    private boolean listaExp() {
+    private void listaExp() {
         // System.out.println("listaExp");
-        if (expressao()) {
-            if (exprLoop()) {
-                return true;
-            } else {
-                return false;
-            }
-        } else {
-            return false;
-        }
+        expressao();
+        exprLoop();
     }
 
     // EXPR_LOOP -> , EXPRESSAO EXPR_LOOP | ε
-    private boolean exprLoop() {
+    private void exprLoop() {
         // System.out.println("exprLoop");
         if (t.tipo == Token.Tipo.Virgula) {
             getToken();
-            if (expressao()) {
-                if (exprLoop()) {
-                    return true;
-                } else {
-                    return false;
-                }
-            } else {
-                return false;
-            }
-
+            expressao();
+            exprLoop();
         } else {
             // Vazio
-            removeErro();
-            return true;
         }
 
     }
