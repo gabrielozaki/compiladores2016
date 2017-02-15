@@ -396,7 +396,7 @@ public class AnalisadorSintatico {
         
     }
     private void program() {
-        //  System.out.println("program");
+        System.out.println("program");
 
         if (t.tipo == Token.Tipo.Programa) {
             getToken();
@@ -405,7 +405,7 @@ public class AnalisadorSintatico {
             sinc_array.add(Token.Tipo.Identificador);
             modoPanico(Token.Tipo.Programa, sinc_array );
         }
-
+System.out.println("ident");
         if (t.tipo == Token.Tipo.Identificador) {
             getToken();
         }else{
@@ -413,6 +413,7 @@ public class AnalisadorSintatico {
             sinc_array.add(Token.Tipo.Ponto_Virgula);
             modoPanico(Token.Tipo.Identificador, sinc_array);
         }
+System.out.println(";");
 
         if (t.tipo == Token.Tipo.Ponto_Virgula) {
             getToken();
@@ -424,13 +425,15 @@ public class AnalisadorSintatico {
         }
 
         bloco();
-        
+
         if (t.tipo == Token.Tipo.Composto_fim_codigo) {
-            getToken();
+            System.out.println("fim");        
         }else{
+            System.out.println("biscuit lixo");        
             List<Token.Tipo> sinc_array = new ArrayList<>();
             modoPanico(Token.Tipo.Composto_fim_codigo, sinc_array);
         }
+   
     }
 
     private void bloco() {
@@ -636,6 +639,8 @@ public class AnalisadorSintatico {
         if (t.tipo == Token.Tipo.Composto_fim) {
             getToken();
         } else {
+            System.out.println("panico"); 
+            System.out.println("tipo"+ t.tipo.name()); 
             List<Token.Tipo> sinc_array = new ArrayList<>();
             sinc_array.addAll(followCmdComposto);
             modoPanico(Token.Tipo.Composto_fim, sinc_array);
@@ -1014,13 +1019,15 @@ public class AnalisadorSintatico {
         //System.out.println("Entrando em modo de panico");
         //System.out.println("Era esperado um token do tipo" + tipo);
         while (true) {
-            getToken();
-            for (Token.Tipo f : follow) {
-                if (t.tipo == f) {
-                    return true;
+            Token token_aux = al.getToken();
+            if (token_aux != null){
+                t = token_aux;
+                for (Token.Tipo f : follow) {
+                    if (t.tipo == f) {
+                        return true;
+                    }
                 }
-            }
-            if (t == null) {
+            }else {
                 return false;
             }
         }

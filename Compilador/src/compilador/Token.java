@@ -27,16 +27,16 @@ public class Token {
         //Declaracao de tipos OBS da pag 1
         //NOTA isso e diferente de Numero_Inteiro, um e a declaracao e o outro e o numero em si
         //Nos codigos de exemplo o professor usou int ao inves de integer, logo aceitaremos ambos
-        Inteiro("integer|int"),
-        Real("real"),
-        Booleano("boolean"),
+        //Inteiro("integer|int"),
+        //Real("real"),
+        //Booleano("boolean"),
         //Atribuicao
         Atribuicao(":="),
         //Valores que um booleano pode assumir, uso isolado tambem e comum
-        Valor_Boleano("true|false"),
+        //Valor_Boleano("true|false"),
         //Declaracao de comandos de leitura escrita OBS da pag 1
-        Leitura("read"),
-        Escrita("write"),
+        //Leitura("read"),
+        //Escrita("write"),
         //Declaracao de comando composto 11
         Composto_inicio("begin"),
         Composto_fim("end"),
