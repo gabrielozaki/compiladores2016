@@ -1018,15 +1018,17 @@ System.out.println(";");
         }
         //System.out.println("Entrando em modo de panico");
         //System.out.println("Era esperado um token do tipo" + tipo);
+        follow.add(0,t.tipo);
         while (true) {
+            
+            for (Token.Tipo f : follow) {
+                if (t.tipo == f) {
+                    return true;
+                }
+            }
             Token token_aux = al.getToken();
             if (token_aux != null){
                 t = token_aux;
-                for (Token.Tipo f : follow) {
-                    if (t.tipo == f) {
-                        return true;
-                    }
-                }
             }else {
                 return false;
             }
