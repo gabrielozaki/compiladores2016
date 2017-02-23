@@ -23,7 +23,7 @@ public class AnalisadorLexico {
     //Entao o indice serve pra sabermos qual o ultimo token que o sintatico pediu
     private int indice = 0;
 
-    public static void AnalisadorLexico() {
+    public AnalisadorLexico() {
         //So cria
     }
 
