@@ -31,4 +31,8 @@ public class TokenSemanticoProcedimento extends Token {
 			parametros.add(p);
 		}
 	}
+        // Adiciona parâmetros
+        public void adicionaParametros(TokenSemanticoVariavel t){
+            parametros.add(t);
+        }
 }

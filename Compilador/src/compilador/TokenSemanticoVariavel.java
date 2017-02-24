@@ -11,8 +11,17 @@ public class TokenSemanticoVariavel extends Token {
 		// enum
 		// Garantindo assim tipos estaticos
 		private TipoVar(String regex){
-            this.regex = regex;
-        }
+                    this.regex = regex;
+                }
+                // função para verificar o tipo da variável
+                public static TipoVar tipoVarByLexema(String lexema){
+                    for (TipoVar tipo: TipoVar.values() ){
+                        if (lexema.matches(tipo.regex)){
+                            return tipo;
+                        }
+                    }
+                    return null;
+                }
 	}
 
 	public TipoVar tipo_var = null;
@@ -31,7 +40,6 @@ public class TokenSemanticoVariavel extends Token {
 	public void setEscopo(int escop){
 		this.escopo = escop;
 	}
-
 	
 	//Define o tipo da variavel, as escolhas são booleano, inteiro e real
 	//Poderia ser feito através de sobrecarga de operador, mas isso iria requerer

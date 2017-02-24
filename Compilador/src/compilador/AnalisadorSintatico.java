@@ -17,6 +17,7 @@ import java.util.logging.Logger;
 public class AnalisadorSintatico {
 
     private AnalisadorLexico al = new AnalisadorLexico();
+    private AnalisadorSemantico as = new AnalisadorSemantico();
     private Token t;
     public List<String> erro = new ArrayList<String>();
 
@@ -130,6 +131,23 @@ public class AnalisadorSintatico {
 
         for (String e : erro) {
             System.out.println(e);
+        }
+        for (String e: as.erros_semanticos){
+            System.out.println("Erro: "+e);
+        }
+        for (TokenSemanticoVariavel ts: as.variaveis){
+            System.out.println("lexema: "+ts.lexema);
+            System.out.println("tipo: "+ts.tipo_var);
+            System.out.println("escopo: "+ts.escopo);
+        }
+        for (TokenSemanticoVariavel tsp: as.procedimentos.get(0).parametros){
+            System.out.println("lexema: "+tsp.lexema);
+            System.out.println("tipo: "+tsp.tipo_var);
+            System.out.println("escopo: "+tsp.escopo);
+        }
+        for (TokenSemanticoProcedimento tp: as.procedimentos){
+            System.out.println("lexema: "+tp.lexema);
+            //System.out.println("tipo: "+ts.tipo_var);
         }
         /*
         if (status) {
@@ -395,6 +413,7 @@ public class AnalisadorSintatico {
         firstExpressao.add(Token.Tipo.Not);
         
     }
+    // PROGRAM -> program identificador ; BLOCO .
     private void program() {
         System.out.println("program");
 
@@ -405,7 +424,7 @@ public class AnalisadorSintatico {
             sinc_array.add(Token.Tipo.Identificador);
             modoPanico(Token.Tipo.Programa, sinc_array );
         }
-System.out.println("ident");
+        System.out.println("ident");
         if (t.tipo == Token.Tipo.Identificador) {
             getToken();
         }else{
@@ -413,7 +432,7 @@ System.out.println("ident");
             sinc_array.add(Token.Tipo.Ponto_Virgula);
             modoPanico(Token.Tipo.Identificador, sinc_array);
         }
-System.out.println(";");
+        System.out.println(";");
 
         if (t.tipo == Token.Tipo.Ponto_Virgula) {
             getToken();
@@ -428,30 +447,31 @@ System.out.println(";");
 
         if (t.tipo == Token.Tipo.Composto_fim_codigo) {
             System.out.println("fim");        
-        }else{
-            System.out.println("biscuit lixo");        
+        }else{    
             List<Token.Tipo> sinc_array = new ArrayList<>();
             modoPanico(Token.Tipo.Composto_fim_codigo, sinc_array);
         }
    
     }
-
+    // BLOCO -> PARTE_DECL_VAR DECL_PROC CMD_COMPOSTO
     private void bloco() {
         //  System.out.println("bloco");
         parteDeclVar();
         declProc();
         cmdComposto();
     }
-
+    // TIPO -> identificador
     private void tipo() {
         //System.out.println("tipo");
         if (t.tipo == Token.Tipo.Identificador) {
+            // atualizando o tipo atual do analisador semântico
+            as.setCurrentVarType(t.lexema);
             getToken();
         } else {
             modoPanico(Token.Tipo.Identificador, followTipo);
         }
     }
-
+    // PARTE_DECL_VAR -> DECL_VAR; PARTE_DECL_VAR  | ε 
     private void parteDeclVar() {
         //System.out.println("partDeclVar");
         // Se o first de declvar for o próximo token a ver é executada
@@ -469,16 +489,20 @@ System.out.println(";");
             //vazio
         }
     }
-
+    // DECL_VAR -> TIPO LISTA_IDENT 
     private void declVar() {
-        //System.out.println("declVar");        
+        //System.out.println("declVar");  
+        // salvando último índice + 1 da lista de variáveis
+        as.saveVarAnchorIndex();
+        as.declaratingVar(true);
         tipo();
         listaIdent();
     }
-
+    // LISTA_IDENT -> identificador IDENT_LOOP
     private void listaIdent() {
         //System.out.println("listaIdent");
         if (t.tipo == Token.Tipo.Identificador) {
+            as.adicionaVariavel(t);
             getToken();
         } else {
             List<Token.Tipo> sinc_array = new ArrayList<>();
@@ -488,12 +512,13 @@ System.out.println(";");
         }
         identLoop();
     }
-
+    // IDENT_LOOP -> , identificador IDENT_LOOP | ε
     private void identLoop() {
         //System.out.println("identLoop");
         if (t.tipo == Token.Tipo.Virgula) {
             getToken();
             if (t.tipo == Token.Tipo.Identificador) {
+                as.adicionaVariavel(t);
                 getToken();              
             } else {
                 List<Token.Tipo> sinc_array = new ArrayList<>();
@@ -514,6 +539,7 @@ System.out.println(";");
         if (t.tipo == Token.Tipo.Procedure) {
             getToken();
             if (t.tipo == Token.Tipo.Identificador) {
+                as.adicionaProcedimento(t);
                 getToken();
                 
             } else {
@@ -539,7 +565,7 @@ System.out.println(";");
                 sinc_array.addAll(followDeclProc);
                 modoPanico(Token.Tipo.Ponto_Virgula, sinc_array);
             }
-                    
+            as.retrocedeEscopo();
         } else {
             //vazio
         }
@@ -547,7 +573,7 @@ System.out.println(";");
 
     //(SEC_PARAM_FORM SEC_PARAM_FORM_LOOP ) | ε
     private void paramForm() {
-        //System.out.println("paramForm");
+        //System.out.println("paramForm");        
         if (t.tipo == Token.Tipo.Parenteses_Abre) {
             getToken();
             secParamForm();
@@ -583,6 +609,8 @@ System.out.println(";");
     //var LISTA_IDENT : identificador | LISTA_IDENT : identificador
     private void secParamForm() {
         //System.out.println("secParamForm");
+        as.declaratingVar(false);
+        as.saveParamAnchorIndex();
         if (t.tipo == Token.Tipo.Variavel) {
             getToken();
             listaIdent();
@@ -595,13 +623,14 @@ System.out.println(";");
                 sinc_array.addAll(followSecParamForm);
                 modoPanico(Token.Tipo.Dois_Pontos, sinc_array);
             }
-            if (t.tipo == Token.Tipo.Identificador) {
+            tipo();
+            /*if (t.tipo == Token.Tipo.Identificador) {
                     getToken();
             } else {
                 List<Token.Tipo> sinc_array = new ArrayList<>();
                 sinc_array.addAll(followSecParamForm);
                 modoPanico(Token.Tipo.Identificador, sinc_array);
-            }
+            }*/
         } else {
             listaIdent();
             if (t.tipo == Token.Tipo.Dois_Pontos) {
@@ -613,14 +642,17 @@ System.out.println(";");
                 sinc_array.addAll(followSecParamForm);
                 modoPanico(Token.Tipo.Dois_Pontos, sinc_array);
             }
+            tipo();
+            /*
             if (t.tipo == Token.Tipo.Identificador) {
                 getToken();
             } else {
                 List<Token.Tipo> sinc_array = new ArrayList<>();
                 sinc_array.addAll(followSecParamForm);
                 modoPanico(Token.Tipo.Identificador, sinc_array);
-            }
+            }*/
         }
+        as.setParamTipeUntilAnchor();
 
     }
 
