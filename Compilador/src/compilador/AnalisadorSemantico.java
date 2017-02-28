@@ -13,9 +13,9 @@ public class AnalisadorSemantico {
             OParam("ordem de parâmetros"),
             VEscopo("fora de escopo"),
             Tipo("atribuição de tipos incompatíveis"),
+            NUtil("não utilizado(a)"),
             Div("div que não é entre inteiros"),
             Read("leitura de tipo incompatível"),
-            NUtil("não utilizado(a)"),
             Write("escrita de tipo incompatível");
             public final String erro;
 
@@ -56,18 +56,19 @@ public class AnalisadorSemantico {
         // termo atual para verificar tipo em expressão
         TokenSemanticoVariavel.TipoVar var_type_curr = null;
         
-        // tokens atuais de uma expressao
-        /*ArrayList<Token> tokens_curr = null;
+        // endereco relativo de variaveis globais
+        public int end_rel_global = -1;
         
-        // variaveis de uma expressao ou parâmetro
-        ArrayList<TokenSemanticoVariavel> vars_curr = null;*/
-        
+        // variavel de rotulos
+        public int rotulos = -1;
 	// Lista de Tokens de variaveis e de procedimentos, basicamente seria as
 	// nossas tabelas
 	// São separadas para acelerar e facilitar as buscas
 	ArrayList<TokenSemanticoProcedimento> procedimentos = new ArrayList<>();
 	ArrayList<TokenSemanticoVariavel> variaveis = new ArrayList<>();
         ArrayList<String> erros_semanticos = new ArrayList<>();
+        // lista de comandos para geracao de codigo
+        ArrayList<Comando> comandos = new ArrayList<>();
 
 	public AnalisadorSemantico() {
             inicializaReservados();
@@ -75,6 +76,7 @@ public class AnalisadorSemantico {
         public void inicializaReservados(){
             Token read = new Token("read", 0, 0, 0);
             Token write = new Token("write", 0, 0, 0);
+            
             Token t_true = new Token("true", 0, 0, 0);
             Token t_false = new Token("false", 0, 0, 0);
             procedimentos.add(
@@ -83,11 +85,25 @@ public class AnalisadorSemantico {
             procedimentos.add(
                     new TokenSemanticoProcedimento(write)
             );
+            end_rel_global++;
             variaveis.add(
-                    new TokenSemanticoVariavel(t_true)
+                    new TokenSemanticoVariavel(
+                            t_true,
+                            TokenSemanticoVariavel.TipoVar.Booleano,
+                            "true",
+                            0,
+                            end_rel_global
+                    )
             );
+            end_rel_global++;
             variaveis.add(
-                    new TokenSemanticoVariavel(t_false)
+                    new TokenSemanticoVariavel(
+                            t_false,
+                            TokenSemanticoVariavel.TipoVar.Booleano,
+                            "false",
+                            0,
+                            end_rel_global
+                    )
             );
         }
 	// Adiciona novos procedimentos
@@ -119,7 +135,14 @@ public class AnalisadorSemantico {
                         ts_aux = new TokenSemanticoVariavel(t);
                         ts_aux.escopo = id;
                         ts_aux.tipo_var = var_current_type;
+                        // adicionando endereço relativo para variaveis globais
+                        if (ts_aux.escopo == 0){
+                            end_rel_global++;
+                            ts_aux.end_rel = end_rel_global;
+                            gerar("", Comando.TipoComando.AMEM, "1");
+                        }
                         variaveis.add(ts_aux);
+                        
                     }
                 }
                 // declarando parâmetros
@@ -156,23 +179,18 @@ public class AnalisadorSemantico {
                 int escopo,
                 ArrayList<TokenSemanticoVariavel> var_array
             ) {
-            System.out.println("existeEEEEEE");
-            System.out.print(escopo);
-            System.out.print(t.lexema);
-            for (int i=var_anchor_index; i<var_array.size(); i++){
+            /*for (int i=var_anchor_index; i<var_array.size(); i++){
                 TokenSemanticoVariavel v = var_array.get(i);
                 if (v.lexema.equals(t.lexema) && (v.escopo == escopo)) {
                     return true;
                 }
-            }/*
+            }*/
             for (TokenSemanticoVariavel v : variaveis) {
                     // Verifica se a variavel já existe naquele escopo
-                    System.out.println("V: "+v.lexema);
-                    System.out.println(v.escopo);
                     if (v.lexema.equals(t.lexema) && (v.escopo == escopo)) {
                             return true;
                     }
-            }*/
+            }
             return false;
 	}
         public boolean verificaExistenciaParam(
@@ -284,6 +302,7 @@ public class AnalisadorSemantico {
         }
         public void comecaAtribuicao(){
             var_curr = getVariavelChecando(lex_var_or_proc);
+            gerar("", Comando.TipoComando.ARMZ, ""+var_curr.end_rel);
         }
         public void terminaAtribuicao(){
             var_curr = null;
@@ -295,6 +314,7 @@ public class AnalisadorSemantico {
             this.verificaUsoVariaveisLocais();
             proc_curr = null;
         }
+        // procura variavel sem acusar erro
         public TokenSemanticoVariavel getVariavel(Token t){
             TokenSemanticoVariavel ts_aux = null;
             for (TokenSemanticoVariavel ts: variaveis){
@@ -311,6 +331,7 @@ public class AnalisadorSemantico {
             }
             return ts_aux;
         }
+        // procura variavel logando o erro no caso de nao encontrar
         public TokenSemanticoVariavel getVariavelChecando(Token t){
             TokenSemanticoVariavel ts = getVariavel(t);
             if (ts==null){
@@ -321,6 +342,7 @@ public class AnalisadorSemantico {
             }
             return ts;
         }
+        // procura procedimento sem acusar erro
         public TokenSemanticoProcedimento getProcedure(Token t){
             TokenSemanticoProcedimento ts_aux = null;
             for (TokenSemanticoProcedimento ts: procedimentos){
@@ -330,6 +352,7 @@ public class AnalisadorSemantico {
             }
             return ts_aux;
         }
+        // procura procedimento logando o erro no caso de nao encontrar
         public TokenSemanticoProcedimento getProcedureChecando(Token t){
             TokenSemanticoProcedimento ts = getProcedure(t);
             if (ts==null){
@@ -340,7 +363,9 @@ public class AnalisadorSemantico {
             }
             return ts;
         }
+        // atualiza o termo para a verificacao de tipo pelo metodo verificaExpTipo
         public void setTermoExpTipo(Token t){
+            geraFator(t);
             if (t.tipo == Token.Tipo.Identificador){
                 var_current_type = getVariavel(t).tipo_var;
             }
@@ -355,7 +380,9 @@ public class AnalisadorSemantico {
                 }
             }
         }
+        // verifica o uso correto entre tipos de expressao 1+1 e nao 1 and 2
         public void verificaExpTipo(Token t){
+            geraOperadorExpr(t);
             if (
                 t.tipo == Token.Tipo.Operador_Divisao||
                 t.tipo == Token.Tipo.Operador_Multiplicacao||
@@ -379,6 +406,7 @@ public class AnalisadorSemantico {
                 }
             }
         }
+        // verifica se alguma procedure global n foi utilizada e loga o erro
         public void verificaUsoProcedures(){
             for (TokenSemanticoProcedimento ts: procedimentos){
                 if(!(ts.usada)){
@@ -386,6 +414,7 @@ public class AnalisadorSemantico {
                 }  
             }
         }
+        // verifica se alguma variavel local n foi utilizada e loga o erro
         public void verificaUsoVariaveisLocais(){
             for (TokenSemanticoVariavel ts_aux: variaveis){
                 if(ts_aux.escopo > 0){
@@ -402,6 +431,7 @@ public class AnalisadorSemantico {
                 }
             }
         }
+        // verifica se alguma variavel global n foi utilizada e loga o erro
         public void verificaUsoVariaveisGlobais(){
             for (TokenSemanticoVariavel ts_aux: variaveis){
                 if(ts_aux.escopo == 0){
@@ -411,5 +441,86 @@ public class AnalisadorSemantico {
                 }   
             }
         }
+        // metodo para gerar codigo adicionando a lista de comandos
+        public void gerar(
+                String rotulo,
+                Comando.TipoComando tipo_comando,
+                String param
+        ){
+            comandos.add(new Comando(rotulo, tipo_comando, param));
+        }
+        public void geraOperadorExpr(Token t){
+            switch (t.tipo){
+                case And:
+                    gerar("", Comando.TipoComando.CONJ, "");
+                    break;
+                case Or:
+                    gerar("", Comando.TipoComando.DISJ, "");
+                    break;
+                case Not:
+                    gerar("", Comando.TipoComando.NEGA, "");
+                    break;
+                case Div:
+                    gerar("", Comando.TipoComando.DIVI, "");
+                    break;
+                case Operador_Soma:
+                    gerar("", Comando.TipoComando.SOMA, "");
+                    break;
+                case Operador_Subtracao:
+                    gerar("", Comando.TipoComando.SUBT, "");
+                    break;
+                case Operador_Multiplicacao:
+                    gerar("", Comando.TipoComando.MULT, "");
+                    break;
+                case Operador_Divisao:
+                    gerar("", Comando.TipoComando.DIVI, "");
+                    break;
+                default:
+                    break;
+            }
+        }
+        public void geraFator(Token t){
+            if (t.tipo == Token.Tipo.Identificador){
+                try {
+                    TokenSemanticoVariavel ts = getVariavel(t);
+                    if (ts.tipo_var == TokenSemanticoVariavel.TipoVar.Booleano){
+                        if (ts.valor == "true"){
+                            gerar("", Comando.TipoComando.CRCT, "1");
+                        }else{
+                            gerar("", Comando.TipoComando.CRCT, "0");
+                        }
+                    }
+                    else{
+                        gerar("", Comando.TipoComando.CRVL, ""+ts.end_rel);
+                    }
+                } catch (Exception e) {
+                }
+                
+                
+            }
+            else{
+                gerar("", Comando.TipoComando.CRCT, t.lexema);
+            }
+        }
+        public void geraRelacao(Token t){
+            switch(t.tipo){
+                case Maior:
+                    gerar("", Comando.TipoComando.CMMA, "");
+                    break;
+                case Menor:
+                    gerar("", Comando.TipoComando.CMME, "");
+                    break;
+                case Igual:
+                    gerar("", Comando.TipoComando.CMIG, "");
+                    break;
+                default:
+                    break;
+            }
+        }
+        public String geraRotulo(){
+            rotulos++;
+            return ("l "+rotulos);
+        }
+        
         
 }

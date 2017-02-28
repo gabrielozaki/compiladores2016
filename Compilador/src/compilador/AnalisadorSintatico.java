@@ -151,6 +151,9 @@ public class AnalisadorSintatico {
             System.out.println("lexema: "+tp.lexema);
             //System.out.println("tipo: "+ts.tipo_var);
         }
+        for (Comando cmd: as.comandos){
+            cmd.imprime();
+        }
         /*
         if (status) {
             System.out.println("Sucesso");
@@ -799,6 +802,8 @@ public class AnalisadorSintatico {
             modoPanico(Token.Tipo.Condicional, sinc_array);
         }
         expressao();
+        String l1 = as.geraRotulo();
+        as.gerar("", Comando.TipoComando.DSVF, l1);
         if (t.tipo == Token.Tipo.Condicionalt) {
             getToken();
         }
@@ -808,16 +813,21 @@ public class AnalisadorSintatico {
             modoPanico(Token.Tipo.Condicionalt, sinc_array);
         }
         comando();
-        elseCmdOpt();
+        elseCmdOpt(l1);
     }
 
     // ELSE_CMD_OPT -> else COMANDO | ε
-    private void elseCmdOpt() {
+    private void elseCmdOpt(String l1) {
         //System.out.println("elseCmdOpt");
         if (t.tipo == Token.Tipo.Condicionale) {
+            String l2 = as.geraRotulo();
+            as.gerar("", Comando.TipoComando.DSVS, l2);
+            as.gerar(l1, Comando.TipoComando.NADA, "");
             getToken();
             comando();
+            as.gerar(l2, Comando.TipoComando.NADA, "");
         } else {
+            as.gerar(l1, Comando.TipoComando.NADA, "");
             //vazio
         }
     }
@@ -861,8 +871,10 @@ public class AnalisadorSintatico {
                 //FALTA MAIOR IGUAL E MENOR IGUAL
                 //t.tipo == Token.Tipo
                 ) {
+            Token aux_t = t;
             relacao();
             expSimpl();
+            as.geraRelacao(aux_t);
         } else {
             // vazio
         }
@@ -870,7 +882,7 @@ public class AnalisadorSintatico {
 
     // RELACAO -> = | <> | < | <= | >= | >
     private void relacao() {
-        //System.out.println("relacao");
+        //System.out.println("relacao");        
         if (t.tipo == Token.Tipo.Maior) {
             getToken();
             

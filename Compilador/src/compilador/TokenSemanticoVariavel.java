@@ -31,12 +31,26 @@ public class TokenSemanticoVariavel extends Token {
 	//Trataremos qualquer valor como String, maneira mais facil 
 	public String valor;
 	public boolean usada = false;
+        // endereco de memoria relativo
+        public int end_rel = -1;
 	
 	public TokenSemanticoVariavel(Token t) {
 		super(t.lexema, t.linha, t.coluna_ini, t.coluna_fim);
 		// TODO Auto-generated constructor stub
 	}
-	
+	public TokenSemanticoVariavel(
+                Token t,
+                TipoVar tipo_var,
+                String valor,
+                int escopo,
+                int end_rel
+        ) {
+		super(t.lexema, t.linha, t.coluna_ini, t.coluna_fim);
+		this.tipo_var = tipo_var;
+                this.valor = valor;
+                this.escopo = escopo;
+                this.end_rel = end_rel;
+	}
 	public void setEscopo(int escop){
 		this.escopo = escop;
 	}
