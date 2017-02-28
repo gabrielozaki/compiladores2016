@@ -752,7 +752,6 @@ public class AnalisadorSintatico {
         //checking firsts of optListaExp
         // chamada de procedimento
         else if (t.tipo == Token.Tipo.Parenteses_Abre) {
-            //as.comecaComando();
             optListaExp();
         }
         //checking firsts of exprOpt +, -,  identificador, numero, (, not

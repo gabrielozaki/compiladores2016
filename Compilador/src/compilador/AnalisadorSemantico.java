@@ -61,6 +61,9 @@ public class AnalisadorSemantico {
         
         // variavel de rotulos
         public int rotulos = -1;
+        
+        // variavel verifica se novo param esta sendo adicionado
+        public boolean novo_param = false;
 	// Lista de Tokens de variaveis e de procedimentos, basicamente seria as
 	// nossas tabelas
 	// São separadas para acelerar e facilitar as buscas
@@ -94,7 +97,9 @@ public class AnalisadorSemantico {
                             0,
                             end_rel_global
                     )
+                    
             );
+            gerar("", Comando.TipoComando.AMEM, ""+end_rel_global);
             end_rel_global++;
             variaveis.add(
                     new TokenSemanticoVariavel(
@@ -105,6 +110,7 @@ public class AnalisadorSemantico {
                             end_rel_global
                     )
             );
+            gerar("", Comando.TipoComando.AMEM, ""+end_rel_global);
         }
 	// Adiciona novos procedimentos
 	public void adicionaProcedimento(Token t) {
@@ -309,6 +315,7 @@ public class AnalisadorSemantico {
         }
         public void comecaProcedure(){
             proc_curr = getProcedureChecando(lex_var_or_proc);
+            novo_param = true;
         }
         public void terminaProcedure(){
             this.verificaUsoVariaveisLocais();
@@ -365,9 +372,16 @@ public class AnalisadorSemantico {
         }
         // atualiza o termo para a verificacao de tipo pelo metodo verificaExpTipo
         public void setTermoExpTipo(Token t){
-            geraFator(t);
+            if(proc_curr == null){
+                geraFator(t);
+            }
             if (t.tipo == Token.Tipo.Identificador){
-                var_current_type = getVariavel(t).tipo_var;
+                TokenSemanticoVariavel ts_aux = getVariavel(t);
+                var_current_type = ts_aux.tipo_var;
+                // adiciona parametro ao procedimento de leitura ou escrita
+                if (proc_curr != null){
+                    chamaProcAdicionaParam(ts_aux);
+                }
             }
             else{
                 if (
@@ -517,10 +531,21 @@ public class AnalisadorSemantico {
                     break;
             }
         }
+
         public String geraRotulo(){
             rotulos++;
-            return ("l "+rotulos);
+            return ("l"+rotulos);
         }
-        
+        public void chamaProcAdicionaParam(TokenSemanticoVariavel ts){
+            if (proc_curr.lexema.equals("read")){
+                gerar("", Comando.TipoComando.LEIT, "");
+                gerar("", Comando.TipoComando.ARMZ, ""+ts.end_rel);
+            }
+            else if (proc_curr.lexema.equals("write")){
+                gerar("", Comando.TipoComando.CRVL, ""+ts.end_rel);
+                gerar("", Comando.TipoComando.IMPE, "");
+                
+            }
+        }
         
 }

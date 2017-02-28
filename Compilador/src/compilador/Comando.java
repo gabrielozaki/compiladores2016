@@ -14,6 +14,8 @@ public class Comando {
             NADA,
             AMEM,
             ARMZ,
+            LEIT,
+            IMPE,
             CRCT,
             CRVL,
             DSVF,
