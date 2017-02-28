@@ -128,6 +128,8 @@ public class AnalisadorSintatico {
             t = al.getToken();
         }*/
         program();
+        as.verificaUsoVariaveisGlobais();
+        as.verificaUsoProcedures();
 
         for (String e : erro) {
             System.out.println(e);
@@ -459,6 +461,7 @@ public class AnalisadorSintatico {
         parteDeclVar();
         declProc();
         cmdComposto();
+        as.removeVarLocal();
     }
     // TIPO -> identificador
     private void tipo() {
@@ -564,7 +567,7 @@ public class AnalisadorSintatico {
                 List<Token.Tipo> sinc_array = new ArrayList<>();
                 sinc_array.addAll(followDeclProc);
                 modoPanico(Token.Tipo.Ponto_Virgula, sinc_array);
-            }
+            }            
             as.retrocedeEscopo();
         } else {
             //vazio
@@ -721,6 +724,7 @@ public class AnalisadorSintatico {
     private void startIdent() {
         //System.out.println("startIdent");
         if (t.tipo == Token.Tipo.Identificador) {
+            as.saveTokenAtribOuProc(t);
             getToken();
         }else {
             List<Token.Tipo> sinc_array = new ArrayList<>();
@@ -734,21 +738,28 @@ public class AnalisadorSintatico {
     //:= EXPRESSAO | OPT_LISTA_EXPR | EXPR_OPT
     private void optIdent() {
         //System.out.println("optIdent");
+        // atribuicao
         if (t.tipo == Token.Tipo.Atribuicao) {
+            // identifica ultimo identificador como inicio de atribuicao
+            as.comecaAtribuicao();
             getToken();
             expressao();
+            as.terminaAtribuicao();
         } 
         //checking firsts of optListaExp
+        // chamada de procedimento
         else if (t.tipo == Token.Tipo.Parenteses_Abre) {
+            //as.comecaComando();
             optListaExp();
         }
         //checking firsts of exprOpt +, -,  identificador, numero, (, not
-        else if (t.tipo == Token.Tipo.Parenteses_Abre ||
+        else if (
                     t.tipo == Token.Tipo.Operador_Soma ||
                     t.tipo == Token.Tipo.Operador_Subtracao ||
                     t.tipo == Token.Tipo.Identificador ||
                     t.tipo == Token.Tipo.Numero_Inteiro ||
-                    t.tipo == Token.Tipo.Not){
+                    t.tipo == Token.Tipo.Not
+                ){
             exprOpt();
         } else {
             // first de optIdent tem vazio 
@@ -760,6 +771,7 @@ public class AnalisadorSintatico {
     private void optListaExp() {
         //System.out.println("optListaExp");
         if (t.tipo == Token.Tipo.Parenteses_Abre) {
+            as.comecaProcedure();
             getToken();
             listaExp();
             if (t.tipo == Token.Tipo.Parenteses_Fecha) {
@@ -768,7 +780,8 @@ public class AnalisadorSintatico {
                 List<Token.Tipo> sinc_array = new ArrayList<>();
                 sinc_array.addAll(followOptListaExpr);
                 modoPanico(Token.Tipo.Parenteses_Fecha, sinc_array);
-            }
+            }            
+            as.terminaProcedure();
         } else {
             //vazio
         }
@@ -916,10 +929,12 @@ public class AnalisadorSintatico {
         // checking first of sinalNOPt
         if (t.tipo == Token.Tipo.Operador_Subtracao ||
                 t.tipo == Token.Tipo.Operador_Soma){
+            as.verificaExpTipo(t);
             sinalNOpt();
             termo();
             termoLoop();
         } else if (t.tipo == Token.Tipo.Or) {
+            as.verificaExpTipo(t);
             termo();
             termoLoop();
         } else {
@@ -939,14 +954,17 @@ public class AnalisadorSintatico {
     private void fatorLoop() {
         //System.out.println("fatorLoop");
         if (t.tipo == Token.Tipo.Operador_Multiplicacao) {
+            as.verificaExpTipo(t);
             getToken();
             fator();
             fatorLoop();
         } else if (t.tipo == Token.Tipo.Div) {
+            as.verificaExpTipo(t);
             getToken();
             fator();
             fatorLoop();
         } else if (t.tipo == Token.Tipo.And) {
+            as.verificaExpTipo(t);
             getToken();
             fator();
             fatorLoop();
@@ -960,6 +978,7 @@ public class AnalisadorSintatico {
     private void variavel() {
         //System.out.println("variavel");
         if (t.tipo == Token.Tipo.Identificador) {
+            as.getVariavelChecando(t);            
             getToken();
             exprOpt();
         } else {
@@ -974,9 +993,11 @@ public class AnalisadorSintatico {
         //System.out.println("fator");
         // checking variavel first
         if (t.tipo == Token.Tipo.Identificador) {
+            as.setTermoExpTipo(t);
             variavel();
         } else if (t.tipo == Token.Tipo.Numero_Real
                 || t.tipo == Token.Tipo.Numero_Inteiro) {
+            as.setTermoExpTipo(t);
             getToken();
         } else if (t.tipo == Token.Tipo.Parenteses_Abre) {
             getToken();
@@ -989,6 +1010,7 @@ public class AnalisadorSintatico {
                 modoPanico(Token.Tipo.Parenteses_Fecha, sinc_array);
             }
         } else if (t.tipo == Token.Tipo.Not) {
+            as.verificaExpTipo(t);
             getToken();
             fator();
         } else {
@@ -1070,7 +1092,16 @@ public class AnalisadorSintatico {
     }
 
     private void logErro(Token encontrado, String esperado) {
-        erro.add("ERRO:" + encontrado.linha + ":" + encontrado.coluna_ini + ":" + encontrado.coluna_fim + " " + encontrado.lexema + " inesperado, era esperado um '" + esperado + "'");
+        erro.add("ERRO:" + 
+                encontrado.linha + 
+                ":" + 
+                encontrado.coluna_ini + 
+                ":" + encontrado.coluna_fim + 
+                " " + encontrado.lexema + 
+                " inesperado, era esperado um '" + 
+                esperado + 
+                "'"
+        );
     }
 
     private void removeErro() {

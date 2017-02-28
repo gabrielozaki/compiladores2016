@@ -15,6 +15,7 @@ public class AnalisadorSemantico {
             Tipo("atribuição de tipos incompatíveis"),
             Div("div que não é entre inteiros"),
             Read("leitura de tipo incompatível"),
+            NUtil("não utilizado(a)"),
             Write("escrita de tipo incompatível");
             public final String erro;
 
@@ -41,6 +42,26 @@ public class AnalisadorSemantico {
         // tipo atual da variável a ser declarada
         // null se não há nehum tipo
         TokenSemanticoVariavel.TipoVar var_current_type = null;
+        
+        // lexema de variavel ou procedimento que receberá um valor ou 
+        // executará um proc
+        Token lex_var_or_proc = null;
+        
+        // Procedure atual
+        TokenSemanticoProcedimento proc_curr = null;
+        
+        // Variável atual
+        TokenSemanticoVariavel var_curr = null;
+        
+        // termo atual para verificar tipo em expressão
+        TokenSemanticoVariavel.TipoVar var_type_curr = null;
+        
+        // tokens atuais de uma expressao
+        /*ArrayList<Token> tokens_curr = null;
+        
+        // variaveis de uma expressao ou parâmetro
+        ArrayList<TokenSemanticoVariavel> vars_curr = null;*/
+        
 	// Lista de Tokens de variaveis e de procedimentos, basicamente seria as
 	// nossas tabelas
 	// São separadas para acelerar e facilitar as buscas
@@ -49,9 +70,26 @@ public class AnalisadorSemantico {
         ArrayList<String> erros_semanticos = new ArrayList<>();
 
 	public AnalisadorSemantico() {
-		// Construtor vazio
+            inicializaReservados();
 	}
-
+        public void inicializaReservados(){
+            Token read = new Token("read", 0, 0, 0);
+            Token write = new Token("write", 0, 0, 0);
+            Token t_true = new Token("true", 0, 0, 0);
+            Token t_false = new Token("false", 0, 0, 0);
+            procedimentos.add(
+                    new TokenSemanticoProcedimento(read)
+            );
+            procedimentos.add(
+                    new TokenSemanticoProcedimento(write)
+            );
+            variaveis.add(
+                    new TokenSemanticoVariavel(t_true)
+            );
+            variaveis.add(
+                    new TokenSemanticoVariavel(t_false)
+            );
+        }
 	// Adiciona novos procedimentos
 	public void adicionaProcedimento(Token t) {
             // Verifica caso o procedimento já existe, pois a linguagem não permite
@@ -229,5 +267,149 @@ public class AnalisadorSemantico {
                 lastProcDecl().parametros.get(i).tipo_var = var_current_type;
             }
         }
-        //procedure proc(var a1, a2, a1 : int; var a2 : boolean );
+        // procedure para remover variáveis locais
+        public void removeVarLocal(){
+            ArrayList<TokenSemanticoVariavel> array_aux = (
+                    ArrayList<TokenSemanticoVariavel>
+                ) variaveis.clone();
+            for (TokenSemanticoVariavel ts: array_aux){
+                if (ts.escopo>0){
+                    variaveis.remove(ts);
+                }
+            }
+        }
+        // salva último lexema para uma futura atribuicao ou procedimento
+        public void saveTokenAtribOuProc(Token t){
+            lex_var_or_proc = t;
+        }
+        public void comecaAtribuicao(){
+            var_curr = getVariavelChecando(lex_var_or_proc);
+        }
+        public void terminaAtribuicao(){
+            var_curr = null;
+        }
+        public void comecaProcedure(){
+            proc_curr = getProcedureChecando(lex_var_or_proc);
+        }
+        public void terminaProcedure(){
+            this.verificaUsoVariaveisLocais();
+            proc_curr = null;
+        }
+        public TokenSemanticoVariavel getVariavel(Token t){
+            TokenSemanticoVariavel ts_aux = null;
+            for (TokenSemanticoVariavel ts: variaveis){
+                if (ts.lexema.equals(t.lexema)){
+                    ts_aux = ts;
+                }
+            }
+            if (proc_curr != null){
+                for (TokenSemanticoVariavel ts: proc_curr.parametros){
+                    if (ts.lexema.equals(t.lexema)){
+                        ts_aux = ts;
+                    }
+                }
+            }
+            return ts_aux;
+        }
+        public TokenSemanticoVariavel getVariavelChecando(Token t){
+            TokenSemanticoVariavel ts = getVariavel(t);
+            if (ts==null){
+                logErro(t, ErroSemanticoTipo.NDecl);
+            }
+            else{
+               ts.usada=true;
+            }
+            return ts;
+        }
+        public TokenSemanticoProcedimento getProcedure(Token t){
+            TokenSemanticoProcedimento ts_aux = null;
+            for (TokenSemanticoProcedimento ts: procedimentos){
+                if (ts.lexema.equals(t.lexema)){
+                    ts_aux = ts;
+                }
+            }
+            return ts_aux;
+        }
+        public TokenSemanticoProcedimento getProcedureChecando(Token t){
+            TokenSemanticoProcedimento ts = getProcedure(t);
+            if (ts==null){
+                logErro(t, ErroSemanticoTipo.NDecl);
+            }
+            else{
+               ts.usada=true;  
+            }
+            return ts;
+        }
+        public void setTermoExpTipo(Token t){
+            if (t.tipo == Token.Tipo.Identificador){
+                var_current_type = getVariavel(t).tipo_var;
+            }
+            else{
+                if (
+                    t.tipo == Token.Tipo.Numero_Inteiro||
+                    t.tipo == Token.Tipo.Numero_Real
+                ){
+                    var_current_type = TokenSemanticoVariavel.TipoVar.Inteiro;
+                }else{
+                    var_current_type = TokenSemanticoVariavel.TipoVar.Booleano;
+                }
+            }
+        }
+        public void verificaExpTipo(Token t){
+            if (
+                t.tipo == Token.Tipo.Operador_Divisao||
+                t.tipo == Token.Tipo.Operador_Multiplicacao||
+                t.tipo == Token.Tipo.Operador_Soma||
+                t.tipo == Token.Tipo.Operador_Subtracao||
+                t.tipo == Token.Tipo.Div
+            ){
+                if (
+                    (var_current_type != 
+                        TokenSemanticoVariavel.TipoVar.Inteiro)
+                        && 
+                    (var_current_type != 
+                        TokenSemanticoVariavel.TipoVar.Real)
+                ){
+                    logErro(t, ErroSemanticoTipo.Tipo);
+                }
+            }else{
+                if (var_current_type != 
+                        TokenSemanticoVariavel.TipoVar.Booleano){
+                    logErro(t, ErroSemanticoTipo.Tipo);
+                }
+            }
+        }
+        public void verificaUsoProcedures(){
+            for (TokenSemanticoProcedimento ts: procedimentos){
+                if(!(ts.usada)){
+                    logErro(ts, ErroSemanticoTipo.NUtil);
+                }  
+            }
+        }
+        public void verificaUsoVariaveisLocais(){
+            for (TokenSemanticoVariavel ts_aux: variaveis){
+                if(ts_aux.escopo > 0){
+                    if (!(ts_aux.usada)){
+                        logErro(ts_aux, ErroSemanticoTipo.NUtil);
+                    }
+                }
+            }
+            if (proc_curr != null){
+                for (TokenSemanticoVariavel ts_aux: proc_curr.parametros){
+                    if (!(ts_aux.usada)){
+                            logErro(ts_aux, ErroSemanticoTipo.NUtil);
+                        }
+                }
+            }
+        }
+        public void verificaUsoVariaveisGlobais(){
+            for (TokenSemanticoVariavel ts_aux: variaveis){
+                if(ts_aux.escopo == 0){
+                    if (!(ts_aux.usada)){
+                        logErro(ts_aux, ErroSemanticoTipo.NUtil);
+                    }
+                }   
+            }
+        }
+        
 }
