@@ -43,4 +43,7 @@ public class Comando {
     public void imprime(){
         System.out.println(rotulo +" "+tipo_comando+ " "+ param);
     }
+    public String getCmdStr(){
+        return rotulo +" "+tipo_comando+ " "+ param;
+    }
 }

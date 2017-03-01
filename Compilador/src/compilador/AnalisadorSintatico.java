@@ -17,7 +17,7 @@ import java.util.logging.Logger;
 public class AnalisadorSintatico {
 
     private AnalisadorLexico al = new AnalisadorLexico();
-    private AnalisadorSemantico as = new AnalisadorSemantico();
+    public AnalisadorSemantico as = new AnalisadorSemantico();
     private Token t;
     public List<String> erro = new ArrayList<String>();
 
@@ -125,9 +125,14 @@ public class AnalisadorSintatico {
         getToken();
         /*while (t != null) {
             System.out.println(t.lexema);
-            t = al.getToken();
+            t = al.getToken();          
         }*/
         program();
+        try {
+            this.erro.remove(this.erro.size()-1);
+        } catch (Exception e) {
+        }
+
         as.verificaUsoVariaveisGlobais();
         as.verificaUsoProcedures();
 

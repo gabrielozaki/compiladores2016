@@ -26,6 +26,10 @@ public class AnalisadorLexico {
     public AnalisadorLexico() {
         //So cria
     }
+    public void limpaAnaliseLexico(){
+        tokens = new ArrayList<>();
+        indice = 0;
+    }
 
     //Recebe um codigo fonte do Analisador Sintatico e gera uma lista de tokens
     public void tokeniza(String str) {

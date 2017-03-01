@@ -1,0 +1,10 @@
+program correto;
+int x, y;
+
+begin
+	read(x,y);
+	if (x<y) then
+		begin
+			write(x,y)
+		end
+end.

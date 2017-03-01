@@ -18,6 +18,7 @@ public class TokenSemanticoProcedimento extends Token {
 		
 		// TODO Auto-generated constructor stub
 	}
+
 	//Define o id do procedimento
 	public void setId(int id){
 		this.id = id;

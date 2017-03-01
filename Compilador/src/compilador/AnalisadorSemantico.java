@@ -2,6 +2,8 @@ package compilador;
 
 import java.util.ArrayList;
 import java.util.concurrent.Semaphore;
+import jdk.nashorn.internal.parser.TokenType;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class AnalisadorSemantico {
 
@@ -76,6 +78,25 @@ public class AnalisadorSemantico {
 	public AnalisadorSemantico() {
             inicializaReservados();
 	}
+        public void limpaAnaliseSemantica(){
+            id = 0;
+            var_anchor_index = -1;
+            param_anchor_index = -1;
+            declarating_var = true;
+            var_current_type = null;
+            lex_var_or_proc = null;
+            proc_curr = null;
+            var_curr = null;
+            var_type_curr = null;
+            end_rel_global = -1;
+            rotulos = -1; 
+            novo_param = false;
+            procedimentos = new ArrayList<>();
+            variaveis = new ArrayList<>();
+            erros_semanticos = new ArrayList<>();
+            comandos = new ArrayList<>();
+            inicializaReservados();
+        }
         public void inicializaReservados(){
             Token read = new Token("read", 0, 0, 0);
             Token write = new Token("write", 0, 0, 0);
@@ -88,7 +109,7 @@ public class AnalisadorSemantico {
             procedimentos.add(
                     new TokenSemanticoProcedimento(write)
             );
-            end_rel_global++;
+            //end_rel_global++;
             variaveis.add(
                     new TokenSemanticoVariavel(
                             t_true,
@@ -99,8 +120,9 @@ public class AnalisadorSemantico {
                     )
                     
             );
-            gerar("", Comando.TipoComando.AMEM, ""+end_rel_global);
-            end_rel_global++;
+            variaveis.get(variaveis.size()-1).usada = true;
+            //gerar("", Comando.TipoComando.AMEM, ""+end_rel_global);
+            //end_rel_global++;
             variaveis.add(
                     new TokenSemanticoVariavel(
                             t_false,
@@ -110,7 +132,8 @@ public class AnalisadorSemantico {
                             end_rel_global
                     )
             );
-            gerar("", Comando.TipoComando.AMEM, ""+end_rel_global);
+            variaveis.get(variaveis.size()-1).usada = true;
+            //gerar("", Comando.TipoComando.AMEM, ""+end_rel_global);
         }
 	// Adiciona novos procedimentos
 	public void adicionaProcedimento(Token t) {
@@ -547,5 +570,178 @@ public class AnalisadorSemantico {
                 
             }
         }
-        
+        public String getComandos(){
+            String s="";
+            for(Comando cmd : comandos){
+                s = s+cmd.getCmdStr()+"\n";
+            }
+            return s;
+        }
+        public String simula(){
+            String result = "";
+            int topo = -1;
+            String topo_str = "";
+            String sub_topo_str = "";
+            Double topo_dbl = 0.0;
+            Double sub_topo_dbl = 0.0;
+            boolean topo_bool = false;
+            boolean sub_topo_bool = false;
+            ArrayList<String> dados = new ArrayList<>();
+            System.out.println("SIMULA");
+            for (int i=0; i<comandos.size();i++){
+                Comando cmd = comandos.get(i);
+                cmd.imprime();
+                System.out.println("i: "+i+ "size: "+ comandos.size());
+                switch(cmd.tipo_comando){
+                    case AMEM:
+                        dados.add("");
+                        topo++;
+                        break;
+                    case ARMZ:   
+                        topo_str = dados.get(topo);
+                        dados.set(Integer.parseInt(cmd.param), topo_str);
+                        dados.remove(topo);
+                        topo--;
+                        break;
+                    case CMIG:
+                        topo_str = dados.get(topo);
+                        sub_topo_str = dados.get(topo-1);
+                        if (sub_topo_str.equals(topo_str)){
+                            dados.set(topo-1, "1");
+                        }else{
+                            dados.set(topo-1, "0");
+                        }
+                        dados.remove(topo);
+                        topo--;
+                        break;
+                    case CMMA:
+                        topo_dbl = Double.parseDouble(dados.get(topo));
+                        sub_topo_dbl = Double.parseDouble(dados.get(topo-1));
+                        if (sub_topo_dbl > topo_dbl){
+                            dados.set(topo-1, "1");
+                        }else{
+                            dados.set(topo-1, "0");
+                        }
+                        dados.remove(topo);
+                        topo--;
+                        break;
+                    case CMME:
+                        
+                        topo_dbl = Double.parseDouble(dados.get(topo));
+                        sub_topo_dbl = Double.parseDouble(dados.get(topo-1));
+                        System.out.println("topo: "+topo_dbl+" Sub: "+sub_topo_dbl);
+                        if (sub_topo_dbl < topo_dbl){
+                            dados.set(topo-1, "1");
+                            System.out.println("Verdade");
+                        }else{
+                            dados.set(topo-1, "0");
+                            System.out.println("Falso");
+                        }
+                        //System.out.println("CMME "+topo_dbl);
+                        dados.remove(topo);
+                        topo--;
+                        break;
+                    case CONJ:
+                        topo_bool = (Integer.parseInt(dados.get(topo))!=0);
+                        sub_topo_bool = topo_bool = (Integer.parseInt(dados.get(topo-1))!=0);
+                        if (topo_bool && sub_topo_bool){
+                            dados.set(topo-1, "1");
+                        }else{
+                            dados.set(topo-1, "0");
+                        }
+                        dados.remove(topo);
+                        topo--;
+                        break;
+                    case CRCT:
+                        dados.add(cmd.param);
+                        topo++;
+                        break;    
+                    case CRVL:
+                        dados.add(dados.get(Integer.parseInt(cmd.param)));
+                        topo++;
+                        break;
+                    case DISJ:
+                        topo_bool = (Integer.parseInt(dados.get(topo))!=0);
+                        sub_topo_bool = topo_bool = (Integer.parseInt(dados.get(topo-1))!=0);
+                        if (topo_bool || sub_topo_bool){
+                            dados.set(topo-1, "1");
+                        }else{
+                            dados.set(topo-1, "0");
+                        }
+                        dados.remove(topo);
+                        topo--;
+                        break;
+                    case DIVI:
+                        topo_dbl = Double.parseDouble(dados.get(topo));
+                        sub_topo_dbl = Double.parseDouble(dados.get(topo-1));
+                        dados.set(topo-1, ""+(sub_topo_dbl/topo_dbl));
+                        dados.remove(topo);
+                        topo--;
+                        break;
+                    case DSVF:
+                        topo_bool = (Integer.parseInt(dados.get(topo))!=0);
+                        if (!topo_bool){
+                            i = indiceCmdByRot(cmd.param, comandos) - 1;
+                            dados.remove(topo);
+                            topo--;
+                        }
+                        //System.out.println("DSVF "+topo_bool);
+                        break;
+                    case DSVS:
+                        i = indiceCmdByRot(cmd.param, comandos)-1;
+                        break;
+                    case IMPE:
+                        //System.out.println("PRINT");
+                        result = result+dados.get(topo)+"\n";
+                        dados.remove(topo);
+                        topo--;
+                        break;
+                    case LEIT:
+                        int randomNum = ThreadLocalRandom.current().nextInt(0,11);
+                        result = result+"Entrada randomica: "+randomNum+"\n";
+                        dados.add(""+randomNum);
+                        topo++;
+                        break;
+                    case MULT:
+                        topo_dbl = Double.parseDouble(dados.get(topo));
+                        sub_topo_dbl = Double.parseDouble(dados.get(topo-1));
+                        dados.set(topo-1, ""+(sub_topo_dbl*topo_dbl));
+                        dados.remove(topo);
+                        topo--;
+                        break;
+                    case NADA:
+                        break;
+                    case NEGA:
+                        topo_bool = (Integer.parseInt(dados.get(topo))!=0);
+                        dados.set(topo, ""+(!(topo_bool)));
+                        break;
+                    case SOMA:
+                        topo_dbl = Double.parseDouble(dados.get(topo));
+                        sub_topo_dbl = Double.parseDouble(dados.get(topo-1));
+                        dados.set(topo-1, ""+(sub_topo_dbl+topo_dbl));
+                        dados.remove(topo);
+                        topo--;
+                        break;
+                    case SUBT:
+                        topo_dbl = Double.parseDouble(dados.get(topo));
+                        sub_topo_dbl = Double.parseDouble(dados.get(topo-1));
+                        dados.set(topo-1, ""+(sub_topo_dbl-topo_dbl));
+                        dados.remove(topo);
+                        topo--;
+                        break;
+                    default:
+                        break;     
+                }
+                
+            }
+            return result;
+        }
+        public int indiceCmdByRot(String rt, ArrayList<Comando> cmd_list){
+            for (int i = 0; i < cmd_list.size(); i++) {
+                if (cmd_list.get(i).rotulo.equals(rt)){
+                    return i;
+                }
+            }
+            return -1;
+        }
 }

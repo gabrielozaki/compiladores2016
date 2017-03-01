@@ -60,6 +60,12 @@ public class Editor extends javax.swing.JFrame {
         TabelaAnalise = new javax.swing.JTable();
         jScrollPane4 = new javax.swing.JScrollPane();
         ErroPane = new javax.swing.JTextPane();
+        jPanel1 = new javax.swing.JPanel();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        GeracaoCodText = new javax.swing.JTextPane();
+        jPanel2 = new javax.swing.JPanel();
+        jScrollPane5 = new javax.swing.JScrollPane();
+        Simulacao = new javax.swing.JTextPane();
         jLabel2 = new javax.swing.JLabel();
         jScrollPane3 = new javax.swing.JScrollPane();
         EditorTexto = new javax.swing.JTextPane(syntaxHigh);
@@ -69,6 +75,8 @@ public class Editor extends javax.swing.JFrame {
         AnalisadoresMenu = new javax.swing.JMenu();
         LexicoMenu = new javax.swing.JMenuItem();
         SintaticoMenu = new javax.swing.JMenuItem();
+        jMenuItem1 = new javax.swing.JMenuItem();
+        jMenuItem2 = new javax.swing.JMenuItem();
         AjudaMenu = new javax.swing.JMenu();
         Definições = new javax.swing.JMenuItem();
 
@@ -92,6 +100,50 @@ public class Editor extends javax.swing.JFrame {
         jScrollPane4.setViewportView(ErroPane);
 
         ResultadosTab.addTab("Erro", jScrollPane4);
+
+        GeracaoCodText.setEditable(false);
+        jScrollPane1.setViewportView(GeracaoCodText);
+
+        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
+        jPanel1.setLayout(jPanel1Layout);
+        jPanel1Layout.setHorizontalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 559, Short.MAX_VALUE)
+                .addContainerGap())
+        );
+        jPanel1Layout.setVerticalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 315, Short.MAX_VALUE)
+                .addContainerGap())
+        );
+
+        ResultadosTab.addTab("Geracao Cod", jPanel1);
+
+        Simulacao.setEditable(false);
+        jScrollPane5.setViewportView(Simulacao);
+
+        javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
+        jPanel2.setLayout(jPanel2Layout);
+        jPanel2Layout.setHorizontalGroup(
+            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jScrollPane5, javax.swing.GroupLayout.DEFAULT_SIZE, 559, Short.MAX_VALUE)
+                .addContainerGap())
+        );
+        jPanel2Layout.setVerticalGroup(
+            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel2Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jScrollPane5, javax.swing.GroupLayout.DEFAULT_SIZE, 315, Short.MAX_VALUE)
+                .addContainerGap())
+        );
+
+        ResultadosTab.addTab("Simulacao", jPanel2);
 
         jLabel2.setText("Saída");
 
@@ -135,6 +187,24 @@ public class Editor extends javax.swing.JFrame {
         });
         AnalisadoresMenu.add(SintaticoMenu);
 
+        jMenuItem1.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_F7, 0));
+        jMenuItem1.setText("Analise Semantica");
+        jMenuItem1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItem1ActionPerformed(evt);
+            }
+        });
+        AnalisadoresMenu.add(jMenuItem1);
+
+        jMenuItem2.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_F8, 0));
+        jMenuItem2.setText("SimulaCod");
+        jMenuItem2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItem2ActionPerformed(evt);
+            }
+        });
+        AnalisadoresMenu.add(jMenuItem2);
+
         BarraMenu.add(AnalisadoresMenu);
 
         AjudaMenu.setText("Ajuda");
@@ -159,7 +229,7 @@ public class Editor extends javax.swing.JFrame {
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jScrollPane3, javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(ResultadosTab, javax.swing.GroupLayout.DEFAULT_SIZE, 592, Short.MAX_VALUE)
+                    .addComponent(ResultadosTab)
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jLabel1)
@@ -220,7 +290,7 @@ public class Editor extends javax.swing.JFrame {
                 //String de erro que irá preencher a area de erro
                 //O resultado é algo como:
                 //"ERRO: 4:2 "x" => Não pertence ao alfabeto
-                erro += "ERRO: " + token.linha + ":" + token.coluna_ini + " \"" + token.lexema + "\" => " + token.erro.name() + "\n";
+                erro += "ERRO LEXICO: " + token.linha + ":" + token.coluna_ini + " \"" + token.lexema + "\" => " + token.erro.name() + "\n";
                 Pattern p;
                 //O regex de { requer o uso de \\, ogo tratamos como um caso especial
                 if (token.erro == Token.Erro.Comentario_Nao_Fechado) {
@@ -279,10 +349,48 @@ public class Editor extends javax.swing.JFrame {
             ErroPane.setText("");
             ResultadosTab.setSelectedIndex(0);
         }
-
-
     }//GEN-LAST:event_LexicoMenuActionPerformed
+    public void adicionaErro(String erro){
+        //Deixa o texto vermelho e insere o texto de erro no jpane
+        MutableAttributeSet attributes = new SimpleAttributeSet();
+        StyleConstants.setForeground(attributes, Color.red);
+        StyleConstants.setBold(attributes, true);
+        ErroPane.setCharacterAttributes(attributes, false);
+        ErroPane.setText(erro);
+        ResultadosTab.setSelectedIndex(1);
 
+        //Pra poder alterar a cor de uma linha em um JTable, temos que criar um novo renderer
+        //Essa implementação cria como se fosse uma clase filha do Renderer default
+        //Referencias:
+        //http://stackoverflow.com/questions/24848314/change-background-color-of-jtable-row-based-on-column-value
+        //
+        TabelaAnalise.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
+            @Override
+            //Aqui ele vai dar um tratamento em cada componente
+            public Component getTableCellRendererComponent(JTable table,
+                    Object value, boolean isSelected, boolean hasFocus, int row, int col) {
+                //pega os atributos da classe pai
+                super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, col);
+                //Pega o valor da coluna lexema
+                String status = (String) table.getModel().getValueAt(row, 1);
+                //Se for igual a nossa STRING de quando ocorre erro
+                if ("---------".equals(status)) {
+                    //Pinta de vermelho
+                    setBackground(Color.RED);
+                    setForeground(Color.WHITE);
+                } else {
+                    //Se não segue os valores default
+                    setBackground(table.getBackground());
+                    setForeground(table.getForeground());
+                }
+                return this;
+            }
+        });
+    }
+    public void limpaErro(){
+        ErroPane.setText("");
+        ResultadosTab.setSelectedIndex(0);
+    }
     private void AbrirArquivoMenuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_AbrirArquivoMenuActionPerformed
         //Foi escolhido o CTRL+O como atalho porque o CTRL+A selecionava todo texto da TextArea
         // Explorador de arquivos do Java, exemplo veio do site da oracle
@@ -334,16 +442,83 @@ public class Editor extends javax.swing.JFrame {
 
     private void SintaticoMenuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_SintaticoMenuActionPerformed
         // TODO add your handling code here:
+        LexicoMenuActionPerformed(evt);
+        String str = EditorTexto.getText() + "\n";
+        //Pra limpar
+        this.as = new AnalisadorSintatico();
+        //Recebe uma lista de tokens 
+        this.as.populaLexico(str);
         as.executaAnalise();
+        
         String s = ErroPane.getText();
         if (as.erro.size() >= 1) {
             for (String e : as.erro) {
-                s = s + "\n" + e;
+                s = s + "\nSintatico: " + e;
             }
-            ResultadosTab.setSelectedIndex(1);
+            adicionaErro(s);
+            //ResultadosTab.setSelectedIndex(1);
         }
+        
 
     }//GEN-LAST:event_SintaticoMenuActionPerformed
+
+    private void jMenuItem1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem1ActionPerformed
+        // TODO add your handling code here:
+        LexicoMenuActionPerformed(evt);
+        String str = EditorTexto.getText() + "\n";
+        //Pra limpar
+        this.as = new AnalisadorSintatico();
+        //Recebe uma lista de tokens 
+        this.as.populaLexico(str);
+        as.executaAnalise();
+        GeracaoCodText.setText(as.as.getComandos());
+        ResultadosTab.setSelectedIndex(2);
+        String s = ErroPane.getText();
+        if (as.erro.size() >= 1) {
+            for (String e : as.erro) {
+                s = s + "\nSintatico: " + e;
+            }
+            adicionaErro(s);
+            //ResultadosTab.setSelectedIndex(1);
+        }
+        if(as.as.erros_semanticos.size()>0){
+            for (String e : as.as.erros_semanticos) {
+                s = s + "\nSemantico: " + e;
+            }
+            adicionaErro(s);
+        }
+        
+    }//GEN-LAST:event_jMenuItem1ActionPerformed
+
+    private void jMenuItem2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem2ActionPerformed
+        // TODO add your handling code here:
+        // TODO add your handling code here:
+        LexicoMenuActionPerformed(evt);
+        String str = EditorTexto.getText() + "\n";
+        //Pra limpar
+        this.as = new AnalisadorSintatico();
+        //Recebe uma lista de tokens 
+        this.as.populaLexico(str);
+        as.executaAnalise();
+        GeracaoCodText.setText(as.as.getComandos());
+        Simulacao.setText(as.as.simula());
+        ResultadosTab.setSelectedIndex(3);
+        String s = ErroPane.getText();
+        if (as.erro.size() >= 1) {
+            for (String e : as.erro) {
+                s = s + "\nSintatico: " + e;
+            }
+            adicionaErro(s);
+            //ResultadosTab.setSelectedIndex(1);
+        }
+        if(as.as.erros_semanticos.size()>0){
+            for (String e : as.as.erros_semanticos) {
+                s = s + "\nSemantico: " + e;
+            }
+            adicionaErro(s);
+        }
+        
+    }//GEN-LAST:event_jMenuItem2ActionPerformed
 
     private void coloreCodigo() {
         //Pega todo texto
@@ -419,14 +594,22 @@ public class Editor extends javax.swing.JFrame {
     private javax.swing.JMenuItem Definições;
     private javax.swing.JTextPane EditorTexto;
     private javax.swing.JTextPane ErroPane;
+    private javax.swing.JTextPane GeracaoCodText;
     private javax.swing.JMenuItem LexicoMenu;
     private javax.swing.JTabbedPane ResultadosTab;
+    private javax.swing.JTextPane Simulacao;
     private javax.swing.JMenuItem SintaticoMenu;
     private javax.swing.JTable TabelaAnalise;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
+    private javax.swing.JMenuItem jMenuItem1;
+    private javax.swing.JMenuItem jMenuItem2;
+    private javax.swing.JPanel jPanel1;
+    private javax.swing.JPanel jPanel2;
+    private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JScrollPane jScrollPane4;
+    private javax.swing.JScrollPane jScrollPane5;
     // End of variables declaration//GEN-END:variables
 }
