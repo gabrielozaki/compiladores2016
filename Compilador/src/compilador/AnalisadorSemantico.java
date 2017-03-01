@@ -692,7 +692,7 @@ public class AnalisadorSemantico {
                         break;
                     case IMPE:
                         //System.out.println("PRINT");
-                        result = result+dados.get(topo)+"\n";
+                        result = result+"IMPRESSAO: "+dados.get(topo)+"\n";
                         dados.remove(topo);
                         topo--;
                         break;
